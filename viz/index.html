@@ -233,9 +233,13 @@ function buildSteps(r){
     S.push({n:4,cls:"bad",badge:1,st:"ESCALATED",log:"decision: ESCALATED — "+r.reason,
       mean:"<span class='r'>Escalated.</span> Because "+why+", it goes to the <b>expensive LLM</b>."});
     if(r.llm){const vc=r.llm.verdict==="malicious"?"r":"g";
-      S.push({n:5,cls:r.llm.verdict==="malicious"?"bad":"good",st:r.llm.verdict,
-        log:"LLM verdict: "+r.llm.verdict+" (conf "+r.llm.confidence+")",
-        mean:"LLM judged <span class='"+vc+"'>"+r.llm.verdict+"</span>. The verdict is <b>written to memory</b>, so the next lookalike is free."});}
+      const cache=r.llm.cached, src=cache?"cache hit":("live API · "+(r.llm.ms||0)+"ms");
+      const srcNote=cache
+        ? "This verdict came <b>from cache</b> (seen before) — no network call. That's the deterministic-demo guarantee: a dropped network can't break a run."
+        : "This was a <b>live API call</b> ("+(r.llm.ms||0)+" ms) — a signature the monitor had never seen.";
+      S.push({n:5,cls:r.llm.verdict==="malicious"?"bad":"good",st:r.llm.verdict+" · "+src,
+        log:"LLM verdict: "+r.llm.verdict+" (conf "+r.llm.confidence+") · "+(cache?"served from cache":"live call "+(r.llm.ms||0)+"ms"),
+        mean:"LLM judged <span class='"+vc+"'>"+r.llm.verdict+"</span>. "+srcNote+" The verdict is <b>written to memory</b>, so the next lookalike is free."});}
   }
   return S;
 }

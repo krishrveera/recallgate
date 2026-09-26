@@ -91,9 +91,12 @@ def live_records(stream=STREAM, inter_sleep=4.0):
             g = decide(emb[eid], now_ts, cheap_features=cf, print_pipeline=False)
             decision, stats, reason = g["decision"], g["neighbor_stats"], g["reason"]
             if decision == "escalate":
+                _t = time.time()
                 v = llm_verdict(fp["signature_text"], context=f"cheap_score={cheap['score']}", allow_network=True)
+                _ms = int((time.time() - _t) * 1000)
                 cost = 1; expensive += 1
-                llm = {"verdict": v["verdict"], "confidence": v["confidence"], "reasoning": v["reasoning"]}
+                llm = {"verdict": v["verdict"], "confidence": v["confidence"], "reasoning": v["reasoning"],
+                       "cached": bool(v.get("cached")), "source": v.get("source", "llm"), "ms": _ms}
                 write_incident(eid, fp["signature_text"], emb[eid], v["verdict"],
                                v["confidence"], fp["ground_truth_label"], cf, now_ts)
             else:
@@ -126,7 +129,8 @@ def offline_records(stream=STREAM, inter_sleep=0.6):
             if decision == "escalate":
                 v = llm_verdict(fp["signature_text"], context=f"cheap_score={cheap['score']}", allow_network=False)
                 cost = 1; expensive += 1
-                llm = {"verdict": v["verdict"], "confidence": v["confidence"], "reasoning": v["reasoning"]}
+                llm = {"verdict": v["verdict"], "confidence": v["confidence"], "reasoning": v["reasoning"],
+                       "cached": bool(v.get("cached")), "source": v.get("source", "llm"), "ms": 0}
                 mem.write(emb[eid], v["verdict"], v["confidence"], now_ts, episode_id=eid)
             else:
                 saved += 1
