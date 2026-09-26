@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Glass-Box Monitor</title>
+<title>Recall Gate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -21,7 +21,6 @@
   body{margin:0;background:radial-gradient(1400px 700px at 50% -15%,#16202c 0%,var(--bg) 55%);
        color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased;
        display:flex;flex-direction:column;overflow:hidden}
-  /* top bar */
   .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px;
        border-bottom:1px solid var(--edge);background:rgba(13,18,25,.7);backdrop-filter:blur(8px)}
   .brand{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:-.01em}
@@ -35,58 +34,65 @@
        padding:8px 15px;border:1px solid var(--edge);background:var(--panel);color:var(--ink)}
   button.act.pri{background:var(--accent);color:#04121d;border-color:var(--accent)}
   button.act:disabled{opacity:.4;cursor:default}
-  .prog{color:var(--dim);font-family:var(--mono);font-size:12.5px;min-width:64px;text-align:right}
-  /* main grid */
-  .main{flex:1;min-height:0;display:grid;grid-template-columns:340px minmax(0,1fr) 320px;gap:0}
+  .prog{color:var(--dim);font-family:var(--mono);font-size:12.5px;min-width:56px;text-align:right}
+  .main{flex:1;min-height:0;display:grid;grid-template-columns:380px minmax(0,1fr) 320px;gap:0}
   @media(max-width:980px){.main{grid-template-columns:1fr;overflow:auto}}
-  .col{padding:22px;min-height:0;overflow:auto}
-  .col.chain{border-right:1px solid var(--edge)}
-  .col.side{border-left:1px solid var(--edge)}
+  .col{min-height:0;overflow:auto}
+  .col.foot{border-right:1px solid var(--edge);padding:22px;display:flex;flex-direction:column}
+  .col.center{padding:30px 44px;display:flex;flex-direction:column;justify-content:center;gap:26px}
+  .col.side{border-left:1px solid var(--edge);padding:22px}
   .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin:0 0 14px}
-  /* footprint card */
-  .fp{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--edge);
-      border-radius:14px;padding:14px 16px;margin-bottom:20px}
-  .fp .top{display:flex;align-items:center;gap:9px;margin-bottom:8px}
-  .fp .hash{font-family:var(--mono);color:var(--dim);font-size:13px}
-  .fp .fam{font-family:var(--disp);font-weight:600;font-size:16px}
-  .pill{font-size:11.5px;font-weight:700;border-radius:20px;padding:2px 10px;margin-left:auto}
+  /* footprint fills the whole left panel */
+  .fp{flex:1;background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--edge);
+      border-radius:16px;padding:20px;display:flex;flex-direction:column;min-height:0}
+  .fp .top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .fp .hash{font-family:var(--mono);color:var(--dim);font-size:14px}
+  .fp .fam{font-family:var(--disp);font-weight:700;font-size:20px}
+  .pill{font-size:12px;font-weight:700;border-radius:20px;padding:3px 11px;margin-left:auto}
   .p-attack{background:rgba(255,91,106,.16);color:var(--mal)}
   .p-benign{background:rgba(61,220,132,.16);color:var(--ben)}
-  .fp .sig{font-family:var(--mono);font-size:11.5px;line-height:1.55;color:#b7c6d6;
-      max-height:0;overflow:hidden;transition:max-height .4s}
-  .fp.show .sig{max-height:220px;margin-top:4px}
-  /* vertical chain */
-  .stage{display:flex;gap:13px;padding:2px 0}
-  .stage .rail{display:flex;flex-direction:column;align-items:center}
-  .stage .dot{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;
-      background:var(--bg2);border:1.5px solid var(--edge);color:var(--faint);font-size:17px;
-      transition:all .45s cubic-bezier(.2,.8,.2,1)}
-  .stage .line{width:2px;flex:1;background:var(--edge);margin:4px 0;min-height:16px;transition:background .4s}
-  .stage:last-child .line{display:none}
-  .stage .body{padding-bottom:14px}
-  .stage .nm{font-family:var(--disp);font-weight:600;font-size:14px;color:var(--dim);transition:color .3s}
-  .stage .st{font-size:12.5px;color:var(--faint);margin-top:2px;min-height:17px;font-family:var(--mono)}
-  .stage.on .dot{border-color:var(--accent);color:var(--accent);transform:scale(1.08);
-      box-shadow:0 0 0 4px rgba(92,200,255,.14),0 0 20px rgba(92,200,255,.35)}
-  .stage.on .nm{color:var(--ink)}
-  .stage.done .dot{border-color:var(--accent-dim);color:var(--ink);background:#132030}
-  .stage.done .line{background:var(--accent-dim)}
-  .stage.done .nm{color:var(--dim)}
-  .stage.skip .dot,.stage.skip .nm,.stage.skip .st{opacity:.32}
-  .stage.good .dot{border-color:var(--supp);color:var(--supp);background:rgba(61,220,132,.10)}
-  .stage.bad .dot{border-color:var(--esc);color:var(--esc);background:rgba(255,91,106,.10)}
-  .stage.fire .dot{border-color:var(--warn);color:var(--warn);background:rgba(255,192,97,.10)}
-  .stage.good .st{color:var(--supp)} .stage.bad .st{color:var(--esc)} .stage.fire .st{color:var(--warn)}
-  /* center readout */
-  .col.read{display:flex;flex-direction:column;justify-content:center;gap:20px;padding:32px 44px}
+  .fp .lbl2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);margin:6px 0}
+  .fp .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .chip{background:var(--bg2);border:1px solid var(--edge);border-radius:6px;padding:2px 8px;
+      font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .chip.hot{border-color:var(--warn);color:var(--warn)}
+  .fp .sig{font-family:var(--mono);font-size:13px;line-height:1.65;color:#c3d0de;
+      background:#0a0f16;border:1px solid var(--edge);border-radius:10px;padding:14px;
+      overflow:auto;flex:1;min-height:0;white-space:pre-wrap}
+  .fp .empty{color:var(--faint);font-size:14px;margin:auto;text-align:center}
+  /* center: explanation then pipeline */
   .rlog{font-family:var(--mono);font-size:13px;color:var(--accent);background:#0a0f16;
       border:1px solid var(--edge);border-radius:10px;padding:12px 15px;white-space:pre-wrap;
       word-break:break-word;transition:opacity .2s}
   .rlog .tag{color:var(--faint)}
-  .rmean{font-size:22px;line-height:1.5;letter-spacing:-.01em;font-family:var(--disp);font-weight:500;
-      max-width:34ch;transition:opacity .25s}
+  .rmean{font-size:23px;line-height:1.5;letter-spacing:-.01em;font-family:var(--disp);font-weight:500;
+      max-width:40ch;transition:opacity .25s;min-height:2em}
   .rmean b{color:var(--accent);font-weight:700} .rmean .g{color:var(--supp)} .rmean .r{color:var(--esc)} .rmean .w{color:var(--warn)}
-  .idle{color:var(--dim);font-size:16px;font-family:var(--sans);font-weight:400}
+  .idle{color:var(--dim);font-size:17px;font-family:var(--sans);max-width:44ch}
+  .expl{display:flex;flex-direction:column;gap:16px}
+  /* horizontal pipeline */
+  .chainwrap{border-top:1px solid var(--edge);padding-top:22px}
+  .chain{display:flex;align-items:flex-start;justify-content:space-between;gap:4px}
+  .node{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;text-align:center}
+  .node .dot{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;
+      background:var(--bg2);border:1.5px solid var(--edge);color:var(--faint);font-size:20px;
+      transition:all .45s cubic-bezier(.2,.8,.2,1);position:relative;z-index:2}
+  .node .cap{font-family:var(--disp);font-weight:600;font-size:12.5px;color:var(--faint);transition:color .3s}
+  .node .st{font-family:var(--mono);font-size:10.5px;line-height:1.35;color:var(--faint);
+      max-width:118px;min-height:14px}
+  .node:not(:last-child):after{content:"";position:absolute;top:23px;left:calc(50% + 27px);
+      right:calc(-50% + 27px);height:2px;background:var(--edge);z-index:1;transition:background .4s}
+  .node.done:not(:last-child):after{background:var(--accent-dim)}
+  .node.on .dot{border-color:var(--accent);color:var(--accent);transform:translateY(-2px) scale(1.07);
+      box-shadow:0 0 0 4px rgba(92,200,255,.14),0 0 22px rgba(92,200,255,.35)}
+  .node.on .cap{color:var(--accent)}
+  .node.done .dot{border-color:var(--accent-dim);color:var(--ink);background:#132030}
+  .node.done .cap{color:var(--dim)}
+  .node.skip .dot,.node.skip .cap,.node.skip .st{opacity:.32}
+  .node.good .dot{border-color:var(--supp);color:var(--supp);background:rgba(61,220,132,.10)}
+  .node.bad .dot{border-color:var(--esc);color:var(--esc);background:rgba(255,91,106,.10)}
+  .node.fire .dot{border-color:var(--warn);color:var(--warn);background:rgba(255,192,97,.10)}
+  .node.good .st{color:var(--supp)} .node.bad .st{color:var(--esc)} .node.fire .st{color:var(--warn)}
   /* side */
   .metrics{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
   .metric{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--edge);
@@ -99,7 +105,6 @@
   .tl.cur{outline:2px solid var(--accent);outline-offset:2px}
   .legend{display:flex;flex-direction:column;gap:5px;color:var(--dim);font-size:11.5px}
   .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:-1px}
-  /* end panel */
   .summary{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--accent-dim);
       border-radius:14px;padding:18px;margin-top:20px}
   .summary h3{margin:0 0 10px;font-family:var(--disp);font-size:15px}
@@ -115,7 +120,7 @@
 </head><body>
 
 <div class="bar">
-  <div class="brand">Glass-Box Monitor<span class="sub">one footprint · one pass through the pipeline</span></div>
+  <div class="brand">Recall Gate<span class="sub">one footprint · one pass through the pipeline</span></div>
   <div class="toggle" id="mode">
     <button data-m="offline" class="sel">Offline replay</button>
     <button data-m="live">Live (Atlas)</button>
@@ -129,17 +134,21 @@
 </div>
 
 <div class="main">
-  <div class="col chain">
+  <div class="col foot">
     <p class="eyebrow">current footprint</p>
-    <div class="fp" id="fp"><div class="top"><span class="hash">—</span></div></div>
-    <p class="eyebrow">the fixed pipeline</p>
-    <div id="chain"></div>
+    <div class="fp" id="fp"><div class="empty">Press Play to begin.</div></div>
   </div>
 
-  <div class="col read" id="read">
-    <div class="rlog" id="rlog" hidden><span class="tag">log</span></div>
-    <div class="idle" id="idle">Press <b style="color:var(--accent)">Play</b>. Each footprint walks the pipeline one stage at a time — you'll see the real backend log and one plain sentence of what it means.</div>
-    <div class="rmean" id="rmean" hidden></div>
+  <div class="col center">
+    <div class="expl">
+      <div class="rlog" id="rlog" hidden><span class="tag">log</span></div>
+      <div class="idle" id="idle">Press <b style="color:var(--accent)">Play</b>. Each footprint walks the pipeline one stage at a time — you'll see the real backend log and one plain sentence of what it means.</div>
+      <div class="rmean" id="rmean" hidden></div>
+    </div>
+    <div class="chainwrap">
+      <p class="eyebrow">the fixed pipeline</p>
+      <div class="chain" id="chain"></div>
+    </div>
   </div>
 
   <div class="col side">
@@ -167,55 +176,53 @@ const $=s=>document.querySelector(s);
 const EMB=(()=>{try{const t=$("#trace").textContent.trim();return t&&!t.startsWith("__")?JSON.parse(t):null;}catch(e){return null;}})();
 const STEP_MS=1650, GAP_MS=900, IGN_MS=1100;
 const NODES=[["◇","Signal"],["⚡","Cheap gate"],["⛨","Override"],["⌘","Memory"],["◈","Decision"],["✦","LLM"]];
+const HOT=["oom_kills","nonzero_exit_count","conn_refused_count","distinct_error_types","restart_count"];
+const FEAT=["restart_count","oom_kills","nonzero_exit_count","failure_rate","distinct_error_types","conn_refused_count","cpu_spike","mem_spike"];
 
-// build chain + timeline scaffolding
 $("#chain").innerHTML=NODES.map((n,i)=>
-  '<div class="stage" data-i="'+i+'"><div class="rail"><div class="dot">'+n[0]+'</div><div class="line"></div></div>'+
-  '<div class="body"><div class="nm">'+n[1]+'</div><div class="st"></div></div></div>').join("");
-const stEls=[...document.querySelectorAll(".stage")];
+  '<div class="node" data-i="'+i+'"><div class="dot">'+n[0]+'</div><div class="cap">'+n[1]+'</div><div class="st"></div></div>').join("");
+const ndEls=[...document.querySelectorAll(".node")];
 let TLN=EMB?EMB.length:0;
 function buildTimeline(n){TLN=n;$("#timeline").innerHTML=Array.from({length:n},(_,i)=>'<div class="tl" data-i="'+i+'"></div>').join("");}
 buildTimeline(TLN);
 
-// ---- state ----
-let mode=EMB?"offline":"offline", queue=[], allRecs=[], streamDone=false, epNo=0;
+let mode="offline", queue=[], allRecs=[], streamDone=false;
 let steps=[], si=0, playing=false, timer=null, curRec=null, es=null, started=false;
 
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
 function fam(r){return r.family.replace(/_/g," ");}
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3200);}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3600);}
 
 function buildSteps(r){
   const S=[], F=fam(r);
   S.push({n:0,cls:"done",st:r.family,log:"footprint captured · family="+r.family+" · label hidden from monitor",
     mean:"A new <b>episode</b> arrives — the container's real reaction ("+F+"). The monitor sees only numbers and a text summary, never the true label."});
   if(!r.cheap.passed){
-    S.push({n:1,cls:"skip-stop",st:"score "+r.cheap.score+" < "+r.cheap.threshold,
+    S.push({n:1,cls:"skip-stop",st:r.cheap.score+" < "+r.cheap.threshold,
       log:"cheap gate: score="+r.cheap.score+" < threshold "+r.cheap.threshold,
       mean:"All-quiet footprint. The <b>cheap numeric gate</b> handles it for free — no memory lookup, no LLM."});
     S.push({n:4,cls:"ignore",badge:1,st:"IGNORED",log:"decision: IGNORED (below threshold)",
       mean:"<b>Ignored.</b> Nothing anomalous here, so nothing expensive runs."});
     return S;
   }
-  S.push({n:1,cls:"done",st:"score "+r.cheap.score+" ≥ "+r.cheap.threshold+" ✓",
+  S.push({n:1,cls:"done",st:r.cheap.score+" ≥ "+r.cheap.threshold+" ✓",
     log:"cheap gate: score="+r.cheap.score+" ≥ threshold "+r.cheap.threshold+" → look closer",
     mean:"The cheap numbers cross the anomaly line — this is <b>worth a closer look</b>."});
   if(r.override.fires){
-    S.push({n:2,cls:"fire",st:"fired: "+r.override.signals.join(", "),
-      log:"hard-signal override FIRED ("+r.override.signals.join(", ")+")",
-      mean:"A real failure signal is present, so <span class='w'>this can never be suppressed</span>. Attack recall is guaranteed here, whatever memory says."});
+    S.push({n:2,cls:"fire",st:"fired",log:"hard-signal override FIRED ("+r.override.signals.join(", ")+")",
+      mean:"A real failure signal is present ("+r.override.signals.join(", ")+"), so <span class='w'>this can never be suppressed</span>. Attack recall is guaranteed here, whatever memory says."});
   }else{
-    S.push({n:2,cls:"done",st:"not applicable",log:"hard-signal override: not applicable",
+    S.push({n:2,cls:"done",st:"n/a",log:"hard-signal override: not applicable",
       mean:"No hard-failure signal, so <b>memory is allowed to decide</b> this one."});
   }
   const s=r.atlas.stats, nb=r.atlas.neighbors||[]; let mmean,mlog,mst;
-  if(!nb.length){mlog="$vectorSearch → 0 neighbours in memory";mst="cold — 0 neighbours";
+  if(!nb.length){mlog="$vectorSearch → 0 neighbours in memory";mst="cold";
     mmean="<b>Memory is cold</b> — nothing similar seen yet. This footprint is unfamiliar.";}
   else if(s&&s.n){const top=nb[0];
     mlog="$vectorSearch → "+nb.length+" neighbours · evidence n="+s.n+" · benign_ratio="+s.benign_ratio+" · mean_sim="+s.mean_score;
-    mst=s.n+" match"+(s.n>1?"es":"")+" · "+s.benign+" benign @"+s.mean_score;
+    mst=s.benign+" benign @"+s.mean_score;
     mmean="Memory <b>recognizes</b> this: "+s.n+" close match"+(s.n>1?"es":"")+" above the similarity floor, <span class='g'>"+s.benign+" benign</span>"+(s.malicious?", "+s.malicious+" malicious":"")+" (top "+top.score.toFixed(3)+").";}
-  else{mlog="$vectorSearch → "+nb.length+" neighbours, all below the 0.97 floor";mst=nb.length+" nearby, below floor";
+  else{mlog="$vectorSearch → "+nb.length+" neighbours, all below the 0.97 floor";mst="below floor";
     mmean="Closest past incidents sit <b>below the similarity floor</b> — not close enough to trust as evidence.";}
   S.push({n:3,cls:"done",st:mst,log:mlog,mean:mmean});
   if(r.decision==="suppress"){
@@ -226,83 +233,66 @@ function buildSteps(r){
     S.push({n:4,cls:"bad",badge:1,st:"ESCALATED",log:"decision: ESCALATED — "+r.reason,
       mean:"<span class='r'>Escalated.</span> Because "+why+", it goes to the <b>expensive LLM</b>."});
     if(r.llm){const vc=r.llm.verdict==="malicious"?"r":"g";
-      S.push({n:5,cls:r.llm.verdict==="malicious"?"bad":"good",st:r.llm.verdict+" @"+r.llm.confidence,
+      S.push({n:5,cls:r.llm.verdict==="malicious"?"bad":"good",st:r.llm.verdict,
         log:"LLM verdict: "+r.llm.verdict+" (conf "+r.llm.confidence+")",
         mean:"LLM judged <span class='"+vc+"'>"+r.llm.verdict+"</span>. The verdict is <b>written to memory</b>, so the next lookalike is free."});}
   }
   return S;
 }
-
 function usedNodes(r){const u=new Set([0,1,4]); if(r.cheap.passed){u.add(2);u.add(3);} if(r.llm)u.add(5); return u;}
 
 function startEpisode(r){
   curRec=r; steps=buildSteps(r); si=0;
-  const F=fam(r);
-  $("#fp").className="fp show";
-  $("#fp").innerHTML='<div class="top"><span class="hash">#'+(r.index+1)+'</span><span class="fam">'+F+
+  const cf=r.cheap_features||{};
+  const chips=FEAT.map(k=>{const v=cf[k]??0;const hot=v&&HOT.includes(k);return '<span class="chip '+(hot?'hot':'')+'">'+k+'='+v+'</span>';}).join("");
+  $("#fp").innerHTML='<div class="top"><span class="hash">#'+(r.index+1)+'</span><span class="fam">'+fam(r)+
      '</span><span class="pill '+(r.label==="attack"?"p-attack":"p-benign")+'">'+r.label+'</span></div>'+
-     '<div class="sig">'+esc(r.signature_text)+'</div>';
+     '<div class="lbl2">cheap numeric features</div><div class="chips">'+chips+'</div>'+
+     '<div class="lbl2">signature text (what the LLM reads)</div><div class="sig">'+esc(r.signature_text)+'</div>';
   const used=usedNodes(r);
-  stEls.forEach((el,i)=>{el.className="stage"+(used.has(i)?"":" skip");el.querySelector(".st").textContent="";});
+  ndEls.forEach((el,i)=>{el.className="node"+(used.has(i)?"":" skip");el.querySelector(".st").textContent="";});
   $("#prog").textContent=(r.index+1)+" / "+(TLN||"?");
   [...document.querySelectorAll(".tl")].forEach(t=>t.classList.remove("cur"));
   const cur=document.querySelector('.tl[data-i="'+r.index+'"]'); if(cur)cur.classList.add("cur");
   $("#idle").hidden=true; $("#rlog").hidden=false; $("#rmean").hidden=false;
 }
-
 function showStep(st){
-  // chain: mark prior active as done, activate this node
-  stEls.forEach(el=>{if(el.classList.contains("on")){el.classList.remove("on");el.classList.add("done");}});
-  const el=stEls[st.n]; el.classList.remove("skip");
-  el.classList.add("on"); if(st.cls==="good")el.classList.add("good");
-  if(st.cls==="bad")el.classList.add("bad"); if(st.cls==="fire")el.classList.add("fire");
+  ndEls.forEach(el=>{if(el.classList.contains("on")){el.classList.remove("on");el.classList.add("done");}});
+  const el=ndEls[st.n]; el.classList.remove("skip"); el.classList.add("on");
+  if(st.cls==="good")el.classList.add("good"); if(st.cls==="bad")el.classList.add("bad"); if(st.cls==="fire")el.classList.add("fire");
   el.querySelector(".st").textContent=st.st||"";
-  // readout
-  const lg=$("#rlog"); lg.style.opacity=0;
-  const mn=$("#rmean"); mn.style.opacity=0;
+  const lg=$("#rlog"); lg.style.opacity=0; const mn=$("#rmean"); mn.style.opacity=0;
   setTimeout(()=>{lg.innerHTML='<span class="tag">log ·</span> '+esc(st.log);lg.style.opacity=1;
                   mn.innerHTML=st.mean;mn.style.opacity=1;},120);
 }
-
 function commit(r){
   $("#m-saved").textContent=r.saved;$("#m-made").textContent=r.cum_cost;
-  $("#m-rec").textContent=r.recall.toFixed(2);
-  $("#m-rec").style.color=r.recall>=1?"var(--supp)":"var(--esc)";
+  $("#m-rec").textContent=r.recall.toFixed(2);$("#m-rec").style.color=r.recall>=1?"var(--supp)":"var(--esc)";
   const tl=document.querySelector('.tl[data-i="'+r.index+'"]'); if(tl)tl.classList.add(r.decision);
 }
-
-// animation pump
 function pump(){
   if(!playing){timer=null;return;}
   if(!curRec || si>=steps.length){
-    if(curRec){commit(curRec);}
-    if(!queue.length){
-      if(streamDone){playing=false;$("#play").textContent="▶ Play";finish();return;}
-      timer=setTimeout(pump,300); return;   // wait for next record
-    }
+    if(curRec)commit(curRec);
+    if(!queue.length){ if(streamDone){playing=false;$("#play").textContent="▶ Play";finish();return;} timer=setTimeout(pump,300);return; }
     startEpisode(queue.shift());
   }
   const st=steps[si++]; showStep(st);
-  const last=si>=steps.length;
-  const dly=(curRec.decision==="ignore")?IGN_MS:(last?STEP_MS+GAP_MS:STEP_MS);
+  const last=si>=steps.length; const dly=(curRec.decision==="ignore")?IGN_MS:(last?STEP_MS+GAP_MS:STEP_MS);
   timer=setTimeout(pump,dly);
 }
-function play(){ if(playing)return; if(!started){started=true;begin();}
-  playing=true;$("#play").textContent="⏸ Pause"; if(!timer)pump(); }
+function play(){ if(playing)return; if(!started){started=true;begin();} playing=true;$("#play").textContent="⏸ Pause"; if(!timer)pump(); }
 function pause(){playing=false;clearTimeout(timer);timer=null;$("#play").textContent="▶ Play";}
 function stepOne(){pause(); if(!started){started=true;begin();}
   if(!curRec||si>=steps.length){if(curRec)commit(curRec); if(!queue.length)return; startEpisode(queue.shift());}
   if(si<steps.length)showStep(steps[si++]); if(si>=steps.length&&curRec)commit(curRec);}
-
 function finish(){
   const R=allRecs; if(!R.length)return;
   const n=R.length, ign=R.filter(r=>r.decision==="ignore").length;
   const supp=R.filter(r=>r.decision==="suppress").length, escl=R.filter(r=>r.decision==="escalate").length;
   const atk=R.filter(r=>r.label==="attack"), atkEsc=atk.filter(r=>r.decision==="escalate").length;
-  const rec=atk.length?atkEsc/atk.length:1;
-  const h=Math.floor(n/2), c=R.map(r=>r.cost);
-  const r1=(c.slice(0,h).reduce((a,b)=>a+b,0)/h).toFixed(2);
-  const r2=(c.slice(h).reduce((a,b)=>a+b,0)/(n-h)).toFixed(2);
+  const rec=atk.length?atkEsc/atk.length:1, h=Math.floor(n/2), c=R.map(r=>r.cost);
+  const r1=(c.slice(0,h).reduce((a,b)=>a+b,0)/h).toFixed(2), r2=(c.slice(h).reduce((a,b)=>a+b,0)/(n-h)).toFixed(2);
   $("#summary").hidden=false;
   $("#summary").innerHTML='<div class="summary"><h3>What you just watched</h3>'+
     '<p><b>'+n+' episodes</b> streamed through the monitor.</p>'+
@@ -310,51 +300,32 @@ function finish(){
     '<p>· <span class="g"><b>'+supp+'</b> suppressed</span> — recognized as benign by memory. Each one is an <b>LLM call saved</b>.</p>'+
     '<p>· <span class="r"><b>'+escl+'</b> escalated</span> to the LLM (the expensive calls).</p>'+
     '<p class="big">All '+atk.length+' attacks were escalated → recall '+rec.toFixed(2)+'.</p>'+
-    '<p>Expensive calls per episode fell from <b>'+r1+'</b> to <b>'+r2+'</b> as memory filled. '+
-    'The system gets cheaper over a session <b>without ever missing an attack</b>.</p></div>';
-  $("#prog").textContent="done · "+supp+" saved · recall "+rec.toFixed(2);
+    '<p>Expensive calls per episode fell from <b>'+r1+'</b> to <b>'+r2+'</b> as memory filled. The system gets cheaper over a session <b>without ever missing an attack</b>.</p></div>';
+  $("#prog").textContent="done";
 }
-
-// ---- sources ----
 function pushRec(r){queue.push(r);allRecs.push(r);}
-function begin(){
-  queue=[];allRecs=[];streamDone=false;curRec=null;si=0;
-  if(EMB){ buildTimeline(EMB.length); EMB.forEach(pushRec); streamDone=true; }
-  else{ openSSE(mode); }
-}
-function openSSE(m){
-  if(es)es.close();
-  es=new EventSource("/events?mode="+m);
-  es.addEventListener("start",()=>{});
-  es.addEventListener("episode",e=>{const r=JSON.parse(e.data);
-     if(!TLN||TLN<r.index+1)buildTimeline(Math.max(TLN,24)); pushRec(r);});
+function begin(){ queue=[];allRecs=[];streamDone=false;curRec=null;si=0;
+  if(EMB){ buildTimeline(EMB.length); EMB.forEach(pushRec); streamDone=true; } else openSSE(mode); }
+function openSSE(m){ if(es)es.close(); es=new EventSource("/events?mode="+m);
+  es.addEventListener("episode",e=>{const r=JSON.parse(e.data); if(!TLN)buildTimeline(24); pushRec(r);});
   es.addEventListener("done",()=>{streamDone=true;es.close();});
   es.addEventListener("error",e=>{let msg="stream error";try{msg=JSON.parse(e.data).error;}catch(_){}
-     streamDone=true; if(es)es.close(); toast("Live error: "+msg+" — switch to Offline");});
-}
-
-function reset(){
-  pause(); started=false; queue=[];allRecs=[];streamDone=false;curRec=null;steps=[];si=0; if(es)es.close();
-  stEls.forEach(el=>{el.className="stage";el.querySelector(".st").textContent="";});
+     streamDone=true; if(es)es.close(); toast("Live error: "+msg+" — switch to Offline");}); }
+function reset(){ pause(); started=false; queue=[];allRecs=[];streamDone=false;curRec=null;steps=[];si=0; if(es)es.close();
+  ndEls.forEach(el=>{el.className="node";el.querySelector(".st").textContent="";});
   buildTimeline(EMB?EMB.length:(TLN||24));
-  $("#fp").className="fp";$("#fp").innerHTML='<div class="top"><span class="hash">—</span></div>';
+  $("#fp").innerHTML='<div class="empty">Press Play to begin.</div>';
   $("#m-saved").textContent=0;$("#m-made").textContent=0;$("#m-rec").textContent="1.00";$("#m-rec").style.color="var(--supp)";
   $("#rlog").hidden=true;$("#rmean").hidden=true;$("#idle").hidden=false;$("#summary").hidden=true;
-  $("#prog").textContent="0 / "+(EMB?EMB.length:"?");
-}
+  $("#prog").textContent="0 / "+(EMB?EMB.length:"?"); }
 
-// mode toggle
 document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{
   const m=b.dataset.m;
-  if(EMB && m==="live"){ toast("Live mode runs in the local app: python viz/server.py → Live (Atlas). This shared page is the cached offline replay."); return; }
-  document.querySelectorAll("#mode button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
-  mode=m; reset();
-});
+  if(EMB && m==="live"){ toast("Live mode runs in the local app: python viz/server.py → Live (Atlas)."); return; }
+  document.querySelectorAll("#mode button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); mode=m; reset(); });
 $("#play").onclick=()=>{playing?pause():play();};
 $("#step").onclick=stepOne;
 $("#reset").onclick=reset;
-
 reset();
-$("#prog").textContent="0 / "+(EMB?EMB.length:"?");
 </script>
 </body></html>
