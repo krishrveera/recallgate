@@ -17,3 +17,6 @@ llm_cache/
 
 # os
 .DS_Store
+
+# ADFA-LD raw dataset (large, fetched on demand)
+data/adfa_raw/

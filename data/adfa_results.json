@@ -1,0 +1,218 @@
+[
+  {
+    "i": 0,
+    "episode_id": "adfa00-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "malicious",
+    "cost": 1,
+    "cum": 1
+  },
+  {
+    "i": 1,
+    "episode_id": "adfa01-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 2
+  },
+  {
+    "i": 2,
+    "episode_id": "adfa02-Java_Meterpreter_10",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "malicious",
+    "cost": 1,
+    "cum": 3
+  },
+  {
+    "i": 3,
+    "episode_id": "adfa03-Hydra_SSH_9",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 4
+  },
+  {
+    "i": 4,
+    "episode_id": "adfa04-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "malicious",
+    "cost": 1,
+    "cum": 5
+  },
+  {
+    "i": 5,
+    "episode_id": "adfa05-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 6
+  },
+  {
+    "i": 6,
+    "episode_id": "adfa06-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 7
+  },
+  {
+    "i": 7,
+    "episode_id": "adfa07-Adduser_9",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 8
+  },
+  {
+    "i": 8,
+    "episode_id": "adfa08-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 9
+  },
+  {
+    "i": 9,
+    "episode_id": "adfa09-Hydra_FTP_9",
+    "truth": "attack",
+    "decision": "suppress",
+    "predicted": "benign",
+    "cost": 0,
+    "cum": 9
+  },
+  {
+    "i": 10,
+    "episode_id": "adfa10-normal",
+    "truth": "benign",
+    "decision": "suppress",
+    "predicted": "benign",
+    "cost": 0,
+    "cum": 9
+  },
+  {
+    "i": 11,
+    "episode_id": "adfa11-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 10
+  },
+  {
+    "i": 12,
+    "episode_id": "adfa12-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "malicious",
+    "cost": 1,
+    "cum": 11
+  },
+  {
+    "i": 13,
+    "episode_id": "adfa13-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 12
+  },
+  {
+    "i": 14,
+    "episode_id": "adfa14-normal",
+    "truth": "benign",
+    "decision": "suppress",
+    "predicted": "benign",
+    "cost": 0,
+    "cum": 12
+  },
+  {
+    "i": 15,
+    "episode_id": "adfa15-Hydra_FTP_2",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 13
+  },
+  {
+    "i": 16,
+    "episode_id": "adfa16-Meterpreter_10",
+    "truth": "attack",
+    "decision": "suppress",
+    "predicted": "benign",
+    "cost": 0,
+    "cum": 13
+  },
+  {
+    "i": 17,
+    "episode_id": "adfa17-normal",
+    "truth": "benign",
+    "decision": "escalate",
+    "predicted": "malicious",
+    "cost": 1,
+    "cum": 14
+  },
+  {
+    "i": 18,
+    "episode_id": "adfa18-Adduser_7",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 15
+  },
+  {
+    "i": 19,
+    "episode_id": "adfa19-normal",
+    "truth": "benign",
+    "decision": "suppress",
+    "predicted": "benign",
+    "cost": 0,
+    "cum": 15
+  },
+  {
+    "i": 20,
+    "episode_id": "adfa20-Hydra_FTP_1",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 16
+  },
+  {
+    "i": 21,
+    "episode_id": "adfa21-Meterpreter_3",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "malicious",
+    "cost": 1,
+    "cum": 17
+  },
+  {
+    "i": 22,
+    "episode_id": "adfa22-Java_Meterpreter_1",
+    "truth": "attack",
+    "decision": "escalate",
+    "predicted": "benign",
+    "cost": 1,
+    "cum": 18
+  },
+  {
+    "i": 23,
+    "episode_id": "adfa23-normal",
+    "truth": "benign",
+    "decision": "suppress",
+    "predicted": "benign",
+    "cost": 0,
+    "cum": 18
+  }
+]
