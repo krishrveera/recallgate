@@ -45,7 +45,7 @@ def run(stream=STREAM, offline=True):
                                 context=f"cheap_score={anomaly_score(cf)}",
                                 allow_network=not offline)
                 cost = 1; expensive += 1; pred = v["verdict"]
-                mem.write(emb[eid], pred, v["confidence"], now_ts)
+                mem.write(emb[eid], pred, v["confidence"], now_ts, episode_id=eid)
         results.append({"i": i, "episode_id": eid, "truth": gt, "decision": decision,
                         "predicted": pred, "cost": cost, "cum": expensive,
                         "reason": reason, "neighbor_stats": stats})

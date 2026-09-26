@@ -20,9 +20,20 @@ class LocalMemory:
     def __init__(self): self.docs = []
     def wipe(self): self.docs = []
     def count(self): return len(self.docs)
-    def write(self, embedding, verdict, confidence, ts):
+    def write(self, embedding, verdict, confidence, ts, episode_id=None):
         self.docs.append({"embedding": embedding, "verdict": verdict,
-                          "confidence": confidence, "ts": int(ts)})
+                          "confidence": confidence, "ts": int(ts),
+                          "episode_id": episode_id})
+
+def local_neighbors(mem, query_embedding, now_ts, limit=10):
+    """Diagnostics: top-k recency-filtered neighbors with Atlas-space score,
+    stored verdict, and episode_id. Mirrors monitor.gate.neighbors_debug offline."""
+    since = int(now_ts) - RECENCY_WINDOW_SECS
+    scored = [{"episode_id": d.get("episode_id"), "verdict": d["verdict"],
+               "confidence": d["confidence"], "score": round(_atlas(_cos(query_embedding, d["embedding"])), 3)}
+              for d in mem.docs if d["ts"] >= since]
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    return scored[:limit]
 
 def local_decide(mem, query_embedding, now_ts, cheap_features):
     """Same output contract as monitor.gate.decide."""
