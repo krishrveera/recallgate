@@ -1,270 +1,360 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!doctype html>
+<html lang="en"><head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>On-Demand Monitor — Glass Box</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Glass-Box Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
   :root{
-    --bg:#0f1419; --panel:#171d26; --panel2:#1e2733; --edge:#2a3543;
-    --ink:#e6edf3; --dim:#8b98a8; --accent:#4aa3ff;
-    --esc:#ff5c5c; --supp:#37d67a; --ign:#7a8699; --mal:#ff5c5c; --ben:#37d67a; --warn:#ffb454;
+    --bg:#0b0e13; --bg2:#10151d; --panel:#141b25; --edge:#232d3b; --edge2:#2c3949;
+    --ink:#eaf1f8; --dim:#8595a8; --faint:#4a5769;
+    --accent:#5cc8ff; --accent-dim:#274d66;
+    --supp:#3ddc84; --esc:#ff5b6a; --warn:#ffc061; --mal:#ff5b6a; --ben:#3ddc84;
+    --disp:"Space Grotesk",-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-  header{padding:16px 20px;border-bottom:1px solid var(--edge);background:var(--panel)}
-  h1{margin:0 0 6px;font-size:18px}
-  .note{color:var(--dim);font-size:13px;max-width:1000px}
-  .note b{color:var(--ink)}
-  .controls{display:flex;gap:10px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--edge);
-            background:var(--panel);position:sticky;top:0;z-index:5}
-  button{background:var(--accent);color:#04121f;border:0;border-radius:6px;padding:8px 14px;
-         font-weight:700;cursor:pointer;font-size:13px}
-  button.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--edge)}
-  button:disabled{opacity:.45;cursor:not-allowed}
-  #status{color:var(--dim);font-size:13px;margin-left:6px}
-  .wrap{display:grid;grid-template-columns:1fr 340px;gap:14px;padding:14px 20px}
-  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
-  .col h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin:4px 0 8px}
-  /* episode cards */
-  .card{background:var(--panel);border:1px solid var(--edge);border-radius:10px;margin-bottom:12px;overflow:hidden}
-  .card.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-  .chead{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;background:var(--panel2)}
-  .chead .ep{font-weight:700}
-  .chead .fam{color:var(--dim)}
-  .spacer{flex:1}
-  .badge{padding:2px 9px;border-radius:20px;font-size:12px;font-weight:700}
-  .b-attack{background:rgba(255,92,92,.16);color:var(--mal)}
-  .b-benign{background:rgba(55,214,122,.16);color:var(--ben)}
-  .b-esc{background:var(--esc);color:#210}
-  .b-supp{background:var(--supp);color:#032}
-  .b-ign{background:var(--ign);color:#111}
-  .stages{padding:6px 12px 12px}
-  .stage{border-left:2px solid var(--edge);padding:8px 0 8px 12px;margin-left:6px;position:relative}
-  .stage:before{content:"";position:absolute;left:-6px;top:12px;width:9px;height:9px;border-radius:50%;
-                background:var(--edge)}
-  .stage.on:before{background:var(--accent)}
-  .stage .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-  .chip{background:var(--panel2);border:1px solid var(--edge);border-radius:6px;padding:1px 7px;font-size:12px}
-  .chip.hot{border-color:var(--warn);color:var(--warn)}
-  .sig{margin-top:6px;background:#0b0f14;border:1px solid var(--edge);border-radius:6px;padding:8px;
-       color:#cdd9e5;font-size:12.5px;white-space:pre-wrap}
-  .kv{font-size:13px}
-  .muted{color:var(--dim)}
-  table.nb{width:100%;border-collapse:collapse;margin-top:6px;font-size:12.5px}
-  table.nb th{color:var(--dim);text-align:left;font-weight:500;padding:2px 6px;border-bottom:1px solid var(--edge)}
-  table.nb td{padding:3px 6px;border-bottom:1px solid #202a36}
-  .bar{height:8px;border-radius:4px;background:#0b0f14;position:relative;min-width:90px}
-  .bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
-  .bar>.floor{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--warn)}
-  .statline{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12.5px}
-  .statline b{color:var(--ink)}
-  .reason{margin-top:6px;font-size:13px}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(1400px 700px at 50% -15%,#16202c 0%,var(--bg) 55%);
+       color:var(--ink);font:15px/1.6 var(--sans);-webkit-font-smoothing:antialiased;
+       display:flex;flex-direction:column;overflow:hidden}
+  /* top bar */
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 22px;
+       border-bottom:1px solid var(--edge);background:rgba(13,18,25,.7);backdrop-filter:blur(8px)}
+  .brand{font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:-.01em}
+  .brand .sub{color:var(--dim);font-weight:500;font-size:12.5px;margin-left:8px;font-family:var(--sans)}
+  .toggle{display:flex;border:1px solid var(--edge);border-radius:10px;overflow:hidden}
+  .toggle button{background:transparent;color:var(--dim);border:0;padding:7px 14px;font-weight:700;
+       font-size:12.5px;cursor:pointer;font-family:var(--sans)}
+  .toggle button.sel{background:var(--accent);color:#04121d}
+  .ctl{display:flex;gap:8px;align-items:center;margin-left:auto}
+  button.act{font-family:var(--sans);font-weight:700;font-size:13px;cursor:pointer;border-radius:9px;
+       padding:8px 15px;border:1px solid var(--edge);background:var(--panel);color:var(--ink)}
+  button.act.pri{background:var(--accent);color:#04121d;border-color:var(--accent)}
+  button.act:disabled{opacity:.4;cursor:default}
+  .prog{color:var(--dim);font-family:var(--mono);font-size:12.5px;min-width:64px;text-align:right}
+  /* main grid */
+  .main{flex:1;min-height:0;display:grid;grid-template-columns:340px minmax(0,1fr) 320px;gap:0}
+  @media(max-width:980px){.main{grid-template-columns:1fr;overflow:auto}}
+  .col{padding:22px;min-height:0;overflow:auto}
+  .col.chain{border-right:1px solid var(--edge)}
+  .col.side{border-left:1px solid var(--edge)}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);margin:0 0 14px}
+  /* footprint card */
+  .fp{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--edge);
+      border-radius:14px;padding:14px 16px;margin-bottom:20px}
+  .fp .top{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+  .fp .hash{font-family:var(--mono);color:var(--dim);font-size:13px}
+  .fp .fam{font-family:var(--disp);font-weight:600;font-size:16px}
+  .pill{font-size:11.5px;font-weight:700;border-radius:20px;padding:2px 10px;margin-left:auto}
+  .p-attack{background:rgba(255,91,106,.16);color:var(--mal)}
+  .p-benign{background:rgba(61,220,132,.16);color:var(--ben)}
+  .fp .sig{font-family:var(--mono);font-size:11.5px;line-height:1.55;color:#b7c6d6;
+      max-height:0;overflow:hidden;transition:max-height .4s}
+  .fp.show .sig{max-height:220px;margin-top:4px}
+  /* vertical chain */
+  .stage{display:flex;gap:13px;padding:2px 0}
+  .stage .rail{display:flex;flex-direction:column;align-items:center}
+  .stage .dot{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;
+      background:var(--bg2);border:1.5px solid var(--edge);color:var(--faint);font-size:17px;
+      transition:all .45s cubic-bezier(.2,.8,.2,1)}
+  .stage .line{width:2px;flex:1;background:var(--edge);margin:4px 0;min-height:16px;transition:background .4s}
+  .stage:last-child .line{display:none}
+  .stage .body{padding-bottom:14px}
+  .stage .nm{font-family:var(--disp);font-weight:600;font-size:14px;color:var(--dim);transition:color .3s}
+  .stage .st{font-size:12.5px;color:var(--faint);margin-top:2px;min-height:17px;font-family:var(--mono)}
+  .stage.on .dot{border-color:var(--accent);color:var(--accent);transform:scale(1.08);
+      box-shadow:0 0 0 4px rgba(92,200,255,.14),0 0 20px rgba(92,200,255,.35)}
+  .stage.on .nm{color:var(--ink)}
+  .stage.done .dot{border-color:var(--accent-dim);color:var(--ink);background:#132030}
+  .stage.done .line{background:var(--accent-dim)}
+  .stage.done .nm{color:var(--dim)}
+  .stage.skip .dot,.stage.skip .nm,.stage.skip .st{opacity:.32}
+  .stage.good .dot{border-color:var(--supp);color:var(--supp);background:rgba(61,220,132,.10)}
+  .stage.bad .dot{border-color:var(--esc);color:var(--esc);background:rgba(255,91,106,.10)}
+  .stage.fire .dot{border-color:var(--warn);color:var(--warn);background:rgba(255,192,97,.10)}
+  .stage.good .st{color:var(--supp)} .stage.bad .st{color:var(--esc)} .stage.fire .st{color:var(--warn)}
+  /* center readout */
+  .col.read{display:flex;flex-direction:column;justify-content:center;gap:20px;padding:32px 44px}
+  .rlog{font-family:var(--mono);font-size:13px;color:var(--accent);background:#0a0f16;
+      border:1px solid var(--edge);border-radius:10px;padding:12px 15px;white-space:pre-wrap;
+      word-break:break-word;transition:opacity .2s}
+  .rlog .tag{color:var(--faint)}
+  .rmean{font-size:22px;line-height:1.5;letter-spacing:-.01em;font-family:var(--disp);font-weight:500;
+      max-width:34ch;transition:opacity .25s}
+  .rmean b{color:var(--accent);font-weight:700} .rmean .g{color:var(--supp)} .rmean .r{color:var(--esc)} .rmean .w{color:var(--warn)}
+  .idle{color:var(--dim);font-size:16px;font-family:var(--sans);font-weight:400}
   /* side */
-  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-  .metric{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:10px}
-  .metric .n{font-size:24px;font-weight:800}
-  .metric .l{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-  canvas{background:var(--panel);border:1px solid var(--edge);border-radius:10px;width:100%;height:200px}
-  #log{background:#080b0f;border:1px solid var(--edge);border-radius:10px;padding:10px;height:260px;
-       overflow:auto;font:12px/1.5 "SF Mono",ui-monospace,Menlo,monospace;color:#b7c4d2;white-space:pre-wrap}
-  #log .d{color:var(--dim)} #log .e{color:var(--esc)} #log .s{color:var(--supp)} #log .a{color:var(--accent)}
+  .metrics{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+  .metric{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--edge);
+      border-radius:12px;padding:12px 14px;display:flex;align-items:baseline;justify-content:space-between}
+  .metric .n{font-family:var(--disp);font-weight:700;font-size:24px;font-variant-numeric:tabular-nums}
+  .metric .l{color:var(--dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em}
+  .timeline{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+  .tl{width:13px;height:13px;border-radius:4px;background:var(--edge);transition:all .3s}
+  .tl.ignore{background:#2b3543} .tl.suppress{background:var(--supp)} .tl.escalate{background:var(--esc)}
+  .tl.cur{outline:2px solid var(--accent);outline-offset:2px}
+  .legend{display:flex;flex-direction:column;gap:5px;color:var(--dim);font-size:11.5px}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:-1px}
+  /* end panel */
+  .summary{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--accent-dim);
+      border-radius:14px;padding:18px;margin-top:20px}
+  .summary h3{margin:0 0 10px;font-family:var(--disp);font-size:15px}
+  .summary p{margin:0 0 10px;font-size:13px;line-height:1.6;color:#cdd9e6}
+  .summary p b{color:var(--ink)} .summary .g{color:var(--supp)} .summary .r{color:var(--esc)}
+  .summary .big{font-family:var(--disp);font-weight:700;font-size:15px;color:var(--ink)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel);
+      border:1px solid var(--edge2);border-radius:10px;padding:11px 16px;font-size:13px;color:var(--ink);
+      box-shadow:0 8px 30px rgba(0,0,0,.4);opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  [hidden]{display:none!important}
 </style>
-</head>
-<body>
-<header>
-  <h1>On-Demand Monitor — glass-box view</h1>
-  <div class="note">
-    <b>What you're looking at.</b> Each row is one <b>episode</b>: the system's real reaction to some activity against a
-    container (crash, restart, scan, or normal traffic), captured only from Docker-level signal. A cheap numeric
-    <b>gate</b> ignores all-quiet episodes for free. Anything anomalous goes to a single <b>Atlas vector search</b> that
-    retrieves similar past incidents from memory and, entirely server-side, computes how many were benign and how
-    similar they are. If enough close neighbours are confidently benign, the episode is <b>suppressed</b> (no expensive
-    LLM call); otherwise it is <b>escalated</b> to the LLM, whose verdict is written back to memory. A cheap-tier
-    <b>hard-signal override</b> guarantees any real crash/OOM/scan is never suppressed, so attack recall stays 1.00 while
-    the expensive-call rate falls as memory fills.
-  </div>
-</header>
+</head><body>
 
-<div class="controls">
-  <button id="live">▶ Run LIVE (real Atlas)</button>
-  <button id="offline" class="ghost">▶ Run OFFLINE (cached, no network)</button>
-  <span id="status">idle</span>
+<div class="bar">
+  <div class="brand">Glass-Box Monitor<span class="sub">one footprint · one pass through the pipeline</span></div>
+  <div class="toggle" id="mode">
+    <button data-m="offline" class="sel">Offline replay</button>
+    <button data-m="live">Live (Atlas)</button>
+  </div>
+  <div class="ctl">
+    <button class="act pri" id="play">▶ Play</button>
+    <button class="act" id="step">Step</button>
+    <button class="act" id="reset">Reset</button>
+    <span class="prog" id="prog">0 / 0</span>
+  </div>
 </div>
 
-<div class="wrap">
-  <div class="col">
-    <h2>Pipeline — one footprint at a time</h2>
-    <div id="stream"></div>
+<div class="main">
+  <div class="col chain">
+    <p class="eyebrow">current footprint</p>
+    <div class="fp" id="fp"><div class="top"><span class="hash">—</span></div></div>
+    <p class="eyebrow">the fixed pipeline</p>
+    <div id="chain"></div>
   </div>
-  <div class="col">
-    <h2>Cost &amp; recall</h2>
+
+  <div class="col read" id="read">
+    <div class="rlog" id="rlog" hidden><span class="tag">log</span></div>
+    <div class="idle" id="idle">Press <b style="color:var(--accent)">Play</b>. Each footprint walks the pipeline one stage at a time — you'll see the real backend log and one plain sentence of what it means.</div>
+    <div class="rmean" id="rmean" hidden></div>
+  </div>
+
+  <div class="col side">
+    <p class="eyebrow">cost &amp; recall</p>
     <div class="metrics">
-      <div class="metric"><div class="n" id="m-saved">0</div><div class="l">LLM calls saved</div></div>
-      <div class="metric"><div class="n" id="m-exp">0</div><div class="l">LLM calls made</div></div>
-      <div class="metric"><div class="n" id="m-rec">1.00</div><div class="l">attack recall</div></div>
-      <div class="metric"><div class="n" id="m-ep">0</div><div class="l">episodes</div></div>
+      <div class="metric"><span class="l">LLM calls saved</span><span class="n" id="m-saved" style="color:var(--supp)">0</span></div>
+      <div class="metric"><span class="l">LLM calls made</span><span class="n" id="m-made">0</span></div>
+      <div class="metric"><span class="l">attack recall</span><span class="n" id="m-rec" style="color:var(--supp)">1.00</span></div>
     </div>
-    <canvas id="chart" width="640" height="200"></canvas>
-    <h2 style="margin-top:14px">Backend log (real)</h2>
-    <div id="log"></div>
+    <p class="eyebrow">episodes</p>
+    <div class="timeline" id="timeline"></div>
+    <div class="legend">
+      <span><i style="background:#2b3543"></i>ignored — cheap gate, free</span>
+      <span><i style="background:var(--supp)"></i>suppressed — memory saved an LLM call</span>
+      <span><i style="background:var(--esc)"></i>escalated — sent to the LLM</span>
+    </div>
+    <div id="summary" hidden></div>
   </div>
 </div>
+<div class="toast" id="toast"></div>
 
+<script id="trace" type="application/json">__TRACE__</script>
 <script>
 const $=s=>document.querySelector(s);
-let es=null, costs=[], cum=[], running=false;
+const EMB=(()=>{try{const t=$("#trace").textContent.trim();return t&&!t.startsWith("__")?JSON.parse(t):null;}catch(e){return null;}})();
+const STEP_MS=1650, GAP_MS=900, IGN_MS=1100;
+const NODES=[["◇","Signal"],["⚡","Cheap gate"],["⛨","Override"],["⌘","Memory"],["◈","Decision"],["✦","LLM"]];
 
-function setRunning(on){running=on; $("#live").disabled=on; $("#offline").disabled=on;}
-function badge(t,cls){return `<span class="badge ${cls}">${t}</span>`;}
+// build chain + timeline scaffolding
+$("#chain").innerHTML=NODES.map((n,i)=>
+  '<div class="stage" data-i="'+i+'"><div class="rail"><div class="dot">'+n[0]+'</div><div class="line"></div></div>'+
+  '<div class="body"><div class="nm">'+n[1]+'</div><div class="st"></div></div></div>').join("");
+const stEls=[...document.querySelectorAll(".stage")];
+let TLN=EMB?EMB.length:0;
+function buildTimeline(n){TLN=n;$("#timeline").innerHTML=Array.from({length:n},(_,i)=>'<div class="tl" data-i="'+i+'"></div>').join("");}
+buildTimeline(TLN);
 
-function log(line){
-  const el=$("#log"); const d=document.createElement("div");
-  let cls=""; if(/SUPPRESS/.test(line))cls="s"; else if(/ESCALAT|DECISION/.test(line))cls="e";
-  else if(/\$vectorSearch|Atlas|\$match|\$group|\$project/.test(line))cls="a";
-  else if(/^\s|verdict=|neighbour|retrieved|cheap gate|override/.test(line))cls="d";
-  d.className=cls; d.textContent=line; el.appendChild(d); el.scrollTop=el.scrollHeight;
+// ---- state ----
+let mode=EMB?"offline":"offline", queue=[], allRecs=[], streamDone=false, epNo=0;
+let steps=[], si=0, playing=false, timer=null, curRec=null, es=null, started=false;
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function fam(r){return r.family.replace(/_/g," ");}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3200);}
+
+function buildSteps(r){
+  const S=[], F=fam(r);
+  S.push({n:0,cls:"done",st:r.family,log:"footprint captured · family="+r.family+" · label hidden from monitor",
+    mean:"A new <b>episode</b> arrives — the container's real reaction ("+F+"). The monitor sees only numbers and a text summary, never the true label."});
+  if(!r.cheap.passed){
+    S.push({n:1,cls:"skip-stop",st:"score "+r.cheap.score+" < "+r.cheap.threshold,
+      log:"cheap gate: score="+r.cheap.score+" < threshold "+r.cheap.threshold,
+      mean:"All-quiet footprint. The <b>cheap numeric gate</b> handles it for free — no memory lookup, no LLM."});
+    S.push({n:4,cls:"ignore",badge:1,st:"IGNORED",log:"decision: IGNORED (below threshold)",
+      mean:"<b>Ignored.</b> Nothing anomalous here, so nothing expensive runs."});
+    return S;
+  }
+  S.push({n:1,cls:"done",st:"score "+r.cheap.score+" ≥ "+r.cheap.threshold+" ✓",
+    log:"cheap gate: score="+r.cheap.score+" ≥ threshold "+r.cheap.threshold+" → look closer",
+    mean:"The cheap numbers cross the anomaly line — this is <b>worth a closer look</b>."});
+  if(r.override.fires){
+    S.push({n:2,cls:"fire",st:"fired: "+r.override.signals.join(", "),
+      log:"hard-signal override FIRED ("+r.override.signals.join(", ")+")",
+      mean:"A real failure signal is present, so <span class='w'>this can never be suppressed</span>. Attack recall is guaranteed here, whatever memory says."});
+  }else{
+    S.push({n:2,cls:"done",st:"not applicable",log:"hard-signal override: not applicable",
+      mean:"No hard-failure signal, so <b>memory is allowed to decide</b> this one."});
+  }
+  const s=r.atlas.stats, nb=r.atlas.neighbors||[]; let mmean,mlog,mst;
+  if(!nb.length){mlog="$vectorSearch → 0 neighbours in memory";mst="cold — 0 neighbours";
+    mmean="<b>Memory is cold</b> — nothing similar seen yet. This footprint is unfamiliar.";}
+  else if(s&&s.n){const top=nb[0];
+    mlog="$vectorSearch → "+nb.length+" neighbours · evidence n="+s.n+" · benign_ratio="+s.benign_ratio+" · mean_sim="+s.mean_score;
+    mst=s.n+" match"+(s.n>1?"es":"")+" · "+s.benign+" benign @"+s.mean_score;
+    mmean="Memory <b>recognizes</b> this: "+s.n+" close match"+(s.n>1?"es":"")+" above the similarity floor, <span class='g'>"+s.benign+" benign</span>"+(s.malicious?", "+s.malicious+" malicious":"")+" (top "+top.score.toFixed(3)+").";}
+  else{mlog="$vectorSearch → "+nb.length+" neighbours, all below the 0.97 floor";mst=nb.length+" nearby, below floor";
+    mmean="Closest past incidents sit <b>below the similarity floor</b> — not close enough to trust as evidence.";}
+  S.push({n:3,cls:"done",st:mst,log:mlog,mean:mmean});
+  if(r.decision==="suppress"){
+    S.push({n:4,cls:"good",badge:1,st:"SUPPRESSED",log:"decision: SUPPRESSED — "+r.reason,
+      mean:"<span class='g'>Suppressed.</span> Familiar and confidently benign, so it's <b>resolved from memory</b> — no expensive LLM call."});
+  }else{
+    const why=r.override.fires?"a hard failure signal is present":"it's unfamiliar or not confidently benign";
+    S.push({n:4,cls:"bad",badge:1,st:"ESCALATED",log:"decision: ESCALATED — "+r.reason,
+      mean:"<span class='r'>Escalated.</span> Because "+why+", it goes to the <b>expensive LLM</b>."});
+    if(r.llm){const vc=r.llm.verdict==="malicious"?"r":"g";
+      S.push({n:5,cls:r.llm.verdict==="malicious"?"bad":"good",st:r.llm.verdict+" @"+r.llm.confidence,
+        log:"LLM verdict: "+r.llm.verdict+" (conf "+r.llm.confidence+")",
+        mean:"LLM judged <span class='"+vc+"'>"+r.llm.verdict+"</span>. The verdict is <b>written to memory</b>, so the next lookalike is free."});}
+  }
+  return S;
 }
 
-function featChips(cf){
-  const order=["restart_count","oom_kills","nonzero_exit_count","failure_rate",
-               "distinct_error_types","conn_refused_count","cpu_spike","mem_spike"];
-  return order.map(k=>{const v=cf[k]; const hot=v&&["oom_kills","nonzero_exit_count","conn_refused_count","distinct_error_types","restart_count"].includes(k);
-    return `<span class="chip ${hot?'hot':''}">${k}=${v}</span>`;}).join("");
+function usedNodes(r){const u=new Set([0,1,4]); if(r.cheap.passed){u.add(2);u.add(3);} if(r.llm)u.add(5); return u;}
+
+function startEpisode(r){
+  curRec=r; steps=buildSteps(r); si=0;
+  const F=fam(r);
+  $("#fp").className="fp show";
+  $("#fp").innerHTML='<div class="top"><span class="hash">#'+(r.index+1)+'</span><span class="fam">'+F+
+     '</span><span class="pill '+(r.label==="attack"?"p-attack":"p-benign")+'">'+r.label+'</span></div>'+
+     '<div class="sig">'+esc(r.signature_text)+'</div>';
+  const used=usedNodes(r);
+  stEls.forEach((el,i)=>{el.className="stage"+(used.has(i)?"":" skip");el.querySelector(".st").textContent="";});
+  $("#prog").textContent=(r.index+1)+" / "+(TLN||"?");
+  [...document.querySelectorAll(".tl")].forEach(t=>t.classList.remove("cur"));
+  const cur=document.querySelector('.tl[data-i="'+r.index+'"]'); if(cur)cur.classList.add("cur");
+  $("#idle").hidden=true; $("#rlog").hidden=false; $("#rmean").hidden=false;
 }
 
-function nbTable(atlas){
-  if(!atlas.ran) return "";
-  if(!atlas.neighbors.length) return `<div class="muted">no neighbours retrieved (cold memory)</div>`;
-  const floor=atlas.floor;
-  let rows=atlas.neighbors.map(nb=>{
-    const w=Math.max(0,Math.min(1,(nb.score-0.7)/0.3))*100;
-    const fl=Math.max(0,Math.min(1,(floor-0.7)/0.3))*100;
-    const ev=nb.score>=floor;
-    const vcls=nb.verdict==="malicious"?"b-attack":"b-benign";
-    return `<tr>
-      <td>${nb.episode_id||"?"}</td>
-      <td>${badge(nb.verdict,vcls)}</td>
-      <td><div class="bar"><i style="width:${w}%;background:${ev?'var(--supp)':'var(--ign)'}"></i>
-          <span class="floor" style="left:${fl}%"></span></div></td>
-      <td>${nb.score.toFixed(3)}${ev?'':' <span class="muted">(below floor)</span>'}</td>
-    </tr>`;}).join("");
-  const s=atlas.stats;
-  let stat = s&&s.n ? `<div class="statline">
-      <span>evidence neighbours: <b>${s.n}</b></span>
-      <span>benign/malicious: <b>${s.benign}/${s.malicious}</b></span>
-      <span>benign_ratio: <b>${s.benign_ratio}</b></span>
-      <span>mean_conf: <b>${s.mean_conf}</b></span>
-      <span>mean_sim: <b>${s.mean_score}</b></span></div>`
-    : `<div class="statline muted">no neighbour cleared the evidence floor (${floor}) → cannot suppress</div>`;
-  return `<table class="nb"><tr><th>past incident</th><th>its verdict</th>
-     <th>similarity (orange line = floor ${floor})</th><th>score</th></tr>${rows}</table>${stat}`;
+function showStep(st){
+  // chain: mark prior active as done, activate this node
+  stEls.forEach(el=>{if(el.classList.contains("on")){el.classList.remove("on");el.classList.add("done");}});
+  const el=stEls[st.n]; el.classList.remove("skip");
+  el.classList.add("on"); if(st.cls==="good")el.classList.add("good");
+  if(st.cls==="bad")el.classList.add("bad"); if(st.cls==="fire")el.classList.add("fire");
+  el.querySelector(".st").textContent=st.st||"";
+  // readout
+  const lg=$("#rlog"); lg.style.opacity=0;
+  const mn=$("#rmean"); mn.style.opacity=0;
+  setTimeout(()=>{lg.innerHTML='<span class="tag">log ·</span> '+esc(st.log);lg.style.opacity=1;
+                  mn.innerHTML=st.mean;mn.style.opacity=1;},120);
 }
 
-function stageHTML(r){
-  const ov = r.override.fires
-    ? `FIRED — ${r.override.signals.join(", ")} present → cannot be suppressed`
-    : (r.cheap.passed ? "not applicable (no hard-failure signal)" : "—");
-  const dec = r.decision==="suppress" ? badge("SUPPRESSED","b-supp")
-            : r.decision==="escalate" ? badge("ESCALATED","b-esc") : badge("IGNORED","b-ign");
-  let llm = r.llm ? `<div class="stage on"><div class="lbl">6 · LLM verdict (expensive tier)</div>
-      <div class="kv">${badge(r.llm.verdict, r.llm.verdict==="malicious"?"b-attack":"b-benign")}
-      &nbsp;confidence ${r.llm.confidence}</div>
-      <div class="reason muted">${r.llm.reasoning}</div>
-      <div class="muted" style="margin-top:4px">→ written to memory for future suppression</div></div>` : "";
-  const cheapMsg = r.cheap.passed
-    ? `score <b>${r.cheap.score}</b> ≥ threshold ${r.cheap.threshold} → passed to the gate`
-    : `score <b>${r.cheap.score}</b> &lt; threshold ${r.cheap.threshold} → ignored for free (no gate, no LLM)`;
-  return `
-   <div class="stage on"><div class="lbl">1 · footprint arrived</div>
-     <div class="chips">${featChips(r.cheap_features)}</div>
-     <div class="sig">${r.signature_text}</div></div>
-   <div class="stage ${r.cheap.passed?'on':''}"><div class="lbl">2 · cheap gate (numeric only)</div>
-     <div class="kv">${cheapMsg}</div></div>
-   ${r.cheap.passed?`<div class="stage ${r.override.fires?'on':''}"><div class="lbl">3 · hard-signal override</div>
-     <div class="kv">${ov}</div></div>
-   <div class="stage on"><div class="lbl">4 · Atlas vector search → memory neighbours</div>
-     ${nbTable(r.atlas)}</div>`:''}
-   <div class="stage on"><div class="lbl">5 · decision</div>
-     <div class="kv">${dec}</div><div class="reason">${r.reason}</div></div>
-   ${llm}`;
+function commit(r){
+  $("#m-saved").textContent=r.saved;$("#m-made").textContent=r.cum_cost;
+  $("#m-rec").textContent=r.recall.toFixed(2);
+  $("#m-rec").style.color=r.recall>=1?"var(--supp)":"var(--esc)";
+  const tl=document.querySelector('.tl[data-i="'+r.index+'"]'); if(tl)tl.classList.add(r.decision);
 }
 
-function addEpisode(r){
-  // collapse previous current card
-  const prev=$("#stream .card.cur");
-  if(prev){prev.classList.remove("cur"); prev.querySelector(".stages").style.display="none";
-           prev.querySelector(".hint").textContent="click to expand";}
-  const div=document.createElement("div");
-  div.className="card cur";
-  const lab=r.label==="attack"?badge("attack","b-attack"):badge("benign","b-benign");
-  const dec=r.decision==="suppress"?badge("SUPPRESSED","b-supp"):
-            r.decision==="escalate"?badge("ESCALATED","b-esc"):badge("IGNORED","b-ign");
-  div.innerHTML=`<div class="chead">
-      <span class="ep">#${r.index+1}</span><span class="fam">${r.family}</span>${lab}
-      <span class="spacer"></span>${dec}<span class="muted hint">current</span></div>
-    <div class="stages">${stageHTML(r)}</div>`;
-  div.querySelector(".chead").onclick=()=>{const s=div.querySelector(".stages");
-      s.style.display=s.style.display==="none"?"block":"none";};
-  $("#stream").prepend(div);
+// animation pump
+function pump(){
+  if(!playing){timer=null;return;}
+  if(!curRec || si>=steps.length){
+    if(curRec){commit(curRec);}
+    if(!queue.length){
+      if(streamDone){playing=false;$("#play").textContent="▶ Play";finish();return;}
+      timer=setTimeout(pump,300); return;   // wait for next record
+    }
+    startEpisode(queue.shift());
+  }
+  const st=steps[si++]; showStep(st);
+  const last=si>=steps.length;
+  const dly=(curRec.decision==="ignore")?IGN_MS:(last?STEP_MS+GAP_MS:STEP_MS);
+  timer=setTimeout(pump,dly);
+}
+function play(){ if(playing)return; if(!started){started=true;begin();}
+  playing=true;$("#play").textContent="⏸ Pause"; if(!timer)pump(); }
+function pause(){playing=false;clearTimeout(timer);timer=null;$("#play").textContent="▶ Play";}
+function stepOne(){pause(); if(!started){started=true;begin();}
+  if(!curRec||si>=steps.length){if(curRec)commit(curRec); if(!queue.length)return; startEpisode(queue.shift());}
+  if(si<steps.length)showStep(steps[si++]); if(si>=steps.length&&curRec)commit(curRec);}
 
-  // logs
-  (r._logs||[]).forEach(log);
-  // metrics
-  $("#m-saved").textContent=r.saved; $("#m-exp").textContent=r.cum_cost;
-  $("#m-rec").textContent=r.recall.toFixed(2); $("#m-ep").textContent=r.index+1;
-  $("#m-rec").style.color = r.recall>=1 ? "var(--supp)" : "var(--esc)";
-  // chart
-  costs.push(r.cost); cum.push(r.cum_cost); drawChart();
+function finish(){
+  const R=allRecs; if(!R.length)return;
+  const n=R.length, ign=R.filter(r=>r.decision==="ignore").length;
+  const supp=R.filter(r=>r.decision==="suppress").length, escl=R.filter(r=>r.decision==="escalate").length;
+  const atk=R.filter(r=>r.label==="attack"), atkEsc=atk.filter(r=>r.decision==="escalate").length;
+  const rec=atk.length?atkEsc/atk.length:1;
+  const h=Math.floor(n/2), c=R.map(r=>r.cost);
+  const r1=(c.slice(0,h).reduce((a,b)=>a+b,0)/h).toFixed(2);
+  const r2=(c.slice(h).reduce((a,b)=>a+b,0)/(n-h)).toFixed(2);
+  $("#summary").hidden=false;
+  $("#summary").innerHTML='<div class="summary"><h3>What you just watched</h3>'+
+    '<p><b>'+n+' episodes</b> streamed through the monitor.</p>'+
+    '<p>· <b>'+ign+'</b> were quiet → filtered by the cheap gate, <b>free</b>.</p>'+
+    '<p>· <span class="g"><b>'+supp+'</b> suppressed</span> — recognized as benign by memory. Each one is an <b>LLM call saved</b>.</p>'+
+    '<p>· <span class="r"><b>'+escl+'</b> escalated</span> to the LLM (the expensive calls).</p>'+
+    '<p class="big">All '+atk.length+' attacks were escalated → recall '+rec.toFixed(2)+'.</p>'+
+    '<p>Expensive calls per episode fell from <b>'+r1+'</b> to <b>'+r2+'</b> as memory filled. '+
+    'The system gets cheaper over a session <b>without ever missing an attack</b>.</p></div>';
+  $("#prog").textContent="done · "+supp+" saved · recall "+rec.toFixed(2);
 }
 
-function drawChart(){
-  const c=$("#chart"), ctx=c.getContext("2d");
-  const W=c.width,H=c.height,pad=28; ctx.clearRect(0,0,W,H);
-  const n=costs.length; if(!n)return;
-  const w=6, roll=costs.map((_,k)=>{const s=costs.slice(Math.max(0,k-w+1),k+1);
-     return s.reduce((a,b)=>a+b,0)/s.length;});
-  // axes
-  ctx.strokeStyle="#2a3543"; ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(pad,6);ctx.lineTo(pad,H-pad);ctx.lineTo(W-8,H-pad);ctx.stroke();
-  ctx.fillStyle="#8b98a8";ctx.font="10px sans-serif";
-  ctx.fillText("1.0",4,12); ctx.fillText("0",pad-12,H-pad+3);
-  ctx.fillText("expensive LLM calls / episode (rolling 6)",pad+4,H-6);
-  const X=k=>pad+(W-pad-12)*(n<=1?0:k/(n-1));
-  const Y=v=>6+(H-pad-6)*(1-v);
-  // rolling line
-  ctx.strokeStyle="#ff5c5c";ctx.lineWidth=2.2;ctx.beginPath();
-  roll.forEach((v,k)=>{const x=X(k),y=Y(v);k?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();
-  roll.forEach((v,k)=>{ctx.fillStyle="#ff5c5c";ctx.beginPath();ctx.arc(X(k),Y(v),2.4,0,7);ctx.fill();});
+// ---- sources ----
+function pushRec(r){queue.push(r);allRecs.push(r);}
+function begin(){
+  queue=[];allRecs=[];streamDone=false;curRec=null;si=0;
+  if(EMB){ buildTimeline(EMB.length); EMB.forEach(pushRec); streamDone=true; }
+  else{ openSSE(mode); }
 }
-
-function start(mode){
-  if(running)return; setRunning(true);
-  $("#stream").innerHTML=""; $("#log").innerHTML=""; costs=[]; cum=[];
-  drawChart(); $("#status").textContent=`running ${mode}…`;
-  es=new EventSource(`/events?mode=${mode}`);
-  es.addEventListener("start",e=>{log(`── started ${JSON.parse(e.data).mode} run ──`);});
+function openSSE(m){
+  if(es)es.close();
+  es=new EventSource("/events?mode="+m);
+  es.addEventListener("start",()=>{});
   es.addEventListener("episode",e=>{const r=JSON.parse(e.data);
-      // move logs out so addEpisode can print them
-      r._logs=r.logs||buildLogs(r); addEpisode(r);});
-  es.addEventListener("done",e=>{const d=JSON.parse(e.data);
-      $("#status").textContent=`done — recall ${d.recall.toFixed(2)}, ${d.saved} calls saved, ${d.expensive} made`;
-      log(`── done: recall=${d.recall.toFixed(2)} saved=${d.saved} made=${d.expensive} ──`);
-      es.close(); setRunning(false);});
-  es.addEventListener("error",e=>{
-      let msg="connection/stream error";
-      try{msg=JSON.parse(e.data).error;}catch(_){}
-      $("#status").textContent=`error: ${msg} — try OFFLINE`;
-      log(`!! error: ${msg}`); if(es)es.close(); setRunning(false);});
+     if(!TLN||TLN<r.index+1)buildTimeline(Math.max(TLN,24)); pushRec(r);});
+  es.addEventListener("done",()=>{streamDone=true;es.close();});
+  es.addEventListener("error",e=>{let msg="stream error";try{msg=JSON.parse(e.data).error;}catch(_){}
+     streamDone=true; if(es)es.close(); toast("Live error: "+msg+" — switch to Offline");});
 }
-// the server already includes readable logs in rec.logs; fallback builder unused
-function buildLogs(r){return r.logs||[];}
 
-$("#live").onclick=()=>start("live");
-$("#offline").onclick=()=>start("offline");
-drawChart();
+function reset(){
+  pause(); started=false; queue=[];allRecs=[];streamDone=false;curRec=null;steps=[];si=0; if(es)es.close();
+  stEls.forEach(el=>{el.className="stage";el.querySelector(".st").textContent="";});
+  buildTimeline(EMB?EMB.length:(TLN||24));
+  $("#fp").className="fp";$("#fp").innerHTML='<div class="top"><span class="hash">—</span></div>';
+  $("#m-saved").textContent=0;$("#m-made").textContent=0;$("#m-rec").textContent="1.00";$("#m-rec").style.color="var(--supp)";
+  $("#rlog").hidden=true;$("#rmean").hidden=true;$("#idle").hidden=false;$("#summary").hidden=true;
+  $("#prog").textContent="0 / "+(EMB?EMB.length:"?");
+}
+
+// mode toggle
+document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{
+  const m=b.dataset.m;
+  if(EMB && m==="live"){ toast("Live mode runs in the local app: python viz/server.py → Live (Atlas). This shared page is the cached offline replay."); return; }
+  document.querySelectorAll("#mode button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
+  mode=m; reset();
+});
+$("#play").onclick=()=>{playing?pause():play();};
+$("#step").onclick=stepOne;
+$("#reset").onclick=reset;
+
+reset();
+$("#prog").textContent="0 / "+(EMB?EMB.length:"?");
 </script>
-</body>
-</html>
+</body></html>
