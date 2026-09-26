@@ -122,9 +122,8 @@
 <div class="bar">
   <div class="brand">Recall Gate<span class="sub">one footprint · one pass through the pipeline</span></div>
   <div class="toggle" id="mode">
-    <button data-m="offline" class="sel">Offline · all cache</button>
-    <button data-m="live">Live · real LLM</button>
-    <button data-m="fresh">Fresh · no cache</button>
+    <button data-m="live" class="sel">Live · real LLM</button>
+    <button data-m="offline">Replay · cached</button>
   </div>
   <div class="ctl">
     <button class="act pri" id="play">▶ Play</button>
@@ -187,7 +186,7 @@ let TLN=EMB?EMB.length:0;
 function buildTimeline(n){TLN=n;$("#timeline").innerHTML=Array.from({length:n},(_,i)=>'<div class="tl" data-i="'+i+'"></div>').join("");}
 buildTimeline(TLN);
 
-let mode="offline", queue=[], allRecs=[], streamDone=false;
+let mode="live", queue=[], allRecs=[], streamDone=false;
 let steps=[], si=0, playing=false, timer=null, curRec=null, es=null, started=false;
 
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
@@ -233,14 +232,19 @@ function buildSteps(r){
     const why=r.override.fires?"a hard failure signal is present":"it's unfamiliar or not confidently benign";
     S.push({n:4,cls:"bad",badge:1,st:"ESCALATED",log:"decision: ESCALATED — "+r.reason,
       mean:"<span class='r'>Escalated.</span> Because "+why+", it goes to the <b>expensive LLM</b>."});
-    if(r.llm){const vc=r.llm.verdict==="malicious"?"r":"g";
-      const cache=r.llm.cached, src=cache?"cache hit":("live API · "+(r.llm.ms||0)+"ms");
-      const srcNote=cache
-        ? "This verdict came <b>from cache</b> (seen before) — no network call. That's the deterministic-demo guarantee: a dropped network can't break a run."
-        : "This was a <b>live API call</b> ("+(r.llm.ms||0)+" ms) — a signature the monitor had never seen.";
+    if(r.llm){const vc=r.llm.verdict==="malicious"?"r":"g", cache=r.llm.cached;
+      if(!cache){   // a real API call in flight — hold on this beat for the real latency
+        S.push({n:5,cls:"",st:"calling LLM…",wait:Math.min(Math.max(r.llm.ms||1200,900),3200),
+          log:"POST /chat/completions  →  live call in flight ("+(r.llm.ms||0)+"ms)",
+          mean:"<b>Escalated.</b> Sending the footprint to the LLM right now — a <b>real API call</b>, not a cache hit."});
+      }
+      const src=cache?"cache hit":("live "+(r.llm.ms||0)+"ms");
+      const note=cache
+        ? "served <b>from cache</b> (this is the offline replay — no network)."
+        : "a <b>real "+(r.llm.ms||0)+" ms API call</b> just returned this.";
       S.push({n:5,cls:r.llm.verdict==="malicious"?"bad":"good",st:r.llm.verdict+" · "+src,
-        log:"LLM verdict: "+r.llm.verdict+" (conf "+r.llm.confidence+") · "+(cache?"served from cache":"live call "+(r.llm.ms||0)+"ms"),
-        mean:"LLM judged <span class='"+vc+"'>"+r.llm.verdict+"</span>. "+srcNote+" The verdict is <b>written to memory</b>, so the next lookalike is free."});}
+        log:"LLM verdict: "+r.llm.verdict+" (conf "+r.llm.confidence+") · "+(cache?"cache":"live "+(r.llm.ms||0)+"ms"),
+        mean:"LLM judged <span class='"+vc+"'>"+r.llm.verdict+"</span> — "+note+" The verdict then <b>updates memory</b>, so a lookalike later can be suppressed."});}
   }
   return S;
 }
@@ -283,7 +287,10 @@ function pump(){
     startEpisode(queue.shift());
   }
   const st=steps[si++]; showStep(st);
-  const last=si>=steps.length; const dly=(curRec.decision==="ignore")?IGN_MS:(last?STEP_MS+GAP_MS:STEP_MS);
+  const last=si>=steps.length;
+  const dly = st.wait ? st.wait                                   // real LLM call latency
+            : (curRec.decision==="ignore") ? IGN_MS
+            : (last ? STEP_MS+GAP_MS : STEP_MS);
   timer=setTimeout(pump,dly);
 }
 function play(){ if(playing)return; if(!started){started=true;begin();} playing=true;$("#play").textContent="⏸ Pause"; if(!timer)pump(); }

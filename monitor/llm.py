@@ -65,9 +65,10 @@ def _fallback(signature_text):
             "reasoning": "deterministic fallback saw no crash/error/scan signatures",
             "source": "fallback"}
 
-def verdict(signature_text, context="", allow_network=True, no_cache=False):
-    """no_cache=True skips the cache READ (forces a real call when allow_network),
-    but still writes the result to cache."""
+def verdict(signature_text, context="", allow_network=True, no_cache=False, no_write=False):
+    """no_cache=True skips the cache READ (forces a real call when allow_network).
+    no_write=True skips the cache WRITE (leaves no persistent trace — a live run
+    stays fresh and repeatable, and the committed offline cache is untouched)."""
     k = _key(signature_text, context)
     if not no_cache:
         cached = _cache_get(k)
@@ -102,6 +103,7 @@ def verdict(signature_text, context="", allow_network=True, no_cache=False):
     if result is None:
         result = _fallback(signature_text)
 
-    _cache_put(k, result)
+    if not no_write:
+        _cache_put(k, result)
     result["cached"] = False
     return result

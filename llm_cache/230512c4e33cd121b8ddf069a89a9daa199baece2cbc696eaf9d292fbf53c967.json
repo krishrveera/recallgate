@@ -1,1 +1,1 @@
-{"verdict": "malicious", "confidence": 0.9, "reasoning": "The die event with exit code 139 indicates a process crash due to a segmentation fault, which is a signature of a malicious exploit.", "source": "llm"}
+{"verdict": "malicious", "confidence": 0.9, "reasoning": "The container experienced a crash with exit code 139, indicating a segmentation fault, which suggests an exploit or crash-inducing input.", "source": "llm"}

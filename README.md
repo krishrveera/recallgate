@@ -33,14 +33,15 @@ cp .env.example .env         # fill MONGODB_URI, VOYAGE_API_KEY, LLM_API_KEY
 python reindex.py            # create incident_vec (dim 1024, cosine, filter ts)
 ```
 
-## Run — three modes, know which one you're in
-| mode | embeddings | LLM | Atlas | network |
-|------|-----------|-----|-------|---------|
-| **offline** | cache only | cache only | local mirror | none (keys can be blank) |
-| **live** | cache, live on miss | **real call every escalation** | real cluster | yes |
-| **fresh** | **live (cache bypassed)** | **real call every escalation** | real cluster | yes |
+## Run — two demo modes, know which one you're in
+| mode | LLM | Atlas memory | persists | network |
+|------|-----|--------------|----------|---------|
+| **Live · real LLM** | **a real API call on every escalation** (~2-3s each) | wiped fresh each run, builds as it goes | nothing (repeatable) | yes |
+| **Replay · cached** | served from cache (instant) | local mirror | — | none (keys can be blank) |
 
-offline is the venue-safe fallback; live proves the LLM is really queried; fresh forces everything live.
+Live is the real demo: memory starts empty, fills as episodes stream, suppression grows, and
+every escalation genuinely hits the LLM (nothing is reused from a prior run). Replay is the
+venue-safe fallback — fully deterministic, runs with the network and keys disabled.
 
 ```bash
 # offline deterministic replay (runs with the network + keys disabled)

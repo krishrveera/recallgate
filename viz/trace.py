@@ -94,8 +94,9 @@ def live_records(stream=STREAM, inter_sleep=4.0, fresh=False):
             decision, stats, reason = g["decision"], g["neighbor_stats"], g["reason"]
             if decision == "escalate":
                 _t = time.time()
+                # live = a REAL call every escalation, persisting nothing (fresh each run)
                 v = llm_verdict(fp["signature_text"], context=f"cheap_score={cheap['score']}",
-                                allow_network=True, no_cache=True)   # live mode = real call every escalation
+                                allow_network=True, no_cache=True, no_write=True)
                 _ms = int((time.time() - _t) * 1000)
                 cost = 1; expensive += 1
                 llm = {"verdict": v["verdict"], "confidence": v["confidence"], "reasoning": v["reasoning"],
