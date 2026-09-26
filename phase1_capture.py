@@ -2,23 +2,36 @@
 import json, sys, time
 from collector.collector import capture_episode
 
-# (kind, family, seed) — the session stream. Ordered so families recur:
-# config_reload is a benign-but-anomalous family (clean restart) that the cheap
-# tier flags, so memory has something to learn and later suppress. Attacks recur
-# too (segfault twice) to show second-pass recognition from memory.
+# (kind, family, seed) — a longer session stream (Phase 3). Each family recurs
+# with different seeds (the clients vary counts/payloads/ordering per seed = real
+# surface variation). config_reload is the benign-but-anomalous family memory can
+# learn and later suppress; the zero-signal benigns are handled free by the cheap
+# tier. Front-loaded cold escalations, back-loaded suppressions + ignores.
 PLAN = [
-    ("benign", "normal_requests",     11),  # zero-signal -> cheap ignores (free)
-    ("attack", "malformed_segfault",  23),  # cold -> escalate -> malicious stored
-    ("benign", "config_reload",       31),  # anomalous benign, cold -> escalate -> benign stored
-    ("attack", "port_scan",           21),  # escalate -> malicious
-    ("benign", "health_checks",       12),  # zero-signal -> ignore
-    ("attack", "resource_exhaustion", 24),  # escalate -> malicious
-    ("benign", "config_reload",       32),  # surface-varied -> gate SUPPRESSES from memory
-    ("attack", "auth_bruteforce",     22),  # escalate -> malicious
-    ("benign", "file_ops",            13),  # zero-signal -> ignore
-    ("attack", "malformed_segfault",  25),  # repeat attack -> recognized from memory (escalate)
-    ("benign", "config_reload",       33),  # surface-varied -> SUPPRESS again
-    ("benign", "normal_requests",     14),  # zero-signal -> ignore
+    ("attack", "malformed_segfault",  101),
+    ("benign", "config_reload",       201),  # cold -> escalate -> benign stored
+    ("attack", "resource_exhaustion", 102),
+    ("benign", "normal_requests",     301),  # zero-signal -> ignore
+    ("attack", "port_scan",           103),
+    ("benign", "health_checks",       302),  # zero-signal -> ignore
+    ("attack", "auth_bruteforce",     104),
+    ("benign", "file_ops",            303),  # zero-signal -> ignore
+    ("benign", "config_reload",       202),  # non-dup -> SUPPRESS from memory
+    ("attack", "malformed_segfault",  105),  # repeat attack -> recognized, escalate
+    ("benign", "config_reload",       203),  # non-dup -> SUPPRESS
+    ("benign", "normal_requests",     304),  # ignore
+    ("attack", "resource_exhaustion", 106),
+    ("benign", "config_reload",       204),  # non-dup -> SUPPRESS
+    ("benign", "health_checks",       305),  # ignore
+    ("attack", "port_scan",           107),
+    ("benign", "config_reload",       205),  # non-dup -> SUPPRESS
+    ("benign", "file_ops",            306),  # ignore
+    ("attack", "malformed_segfault",  108),  # recognized, escalate
+    ("benign", "config_reload",       206),  # non-dup -> SUPPRESS
+    ("benign", "normal_requests",     307),  # ignore
+    ("attack", "auth_bruteforce",     109),
+    ("benign", "health_checks",       308),  # ignore
+    ("benign", "config_reload",       207),  # non-dup -> SUPPRESS
 ]
 
 OUT = "data/footprints.jsonl"

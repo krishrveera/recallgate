@@ -120,7 +120,10 @@ def build_footprint(episode_id, family, label, client_out, rc_before, rc_after,
         "conn_refused_count": refused,
     }
 
-    # signature_text: ordered NL rendering of the real stream
+    # signature_text: OBSERVATION-ONLY rendering of the real stream.
+    # No family label, no episode id, no stated intent -- only what was observed
+    # (client outcomes, docker events + exit codes, log tallies, resource use),
+    # so embedding similarity reflects real footprint shape, not a leaked label.
     accepts = len(re.findall(r"connection accepted", logs))
     authfails = len(re.findall(r"auth failure", logs))
     ev_seq = []
@@ -131,20 +134,22 @@ def build_footprint(episode_id, family, label, client_out, rc_before, rc_after,
         elif act in ("oom", "start", "restart", "kill"):
             ev_seq.append(act)
     parts = [
-        f"Episode {episode_id} family={family}.",
-        f"Client opened {requests} operations to target:9000; "
-        f"{failures} failed, {refused} connection-refused. "
-        f"Note: {client_out.get('note','')}.",
+        f"The client issued {requests} operations to the service; "
+        f"{failures} returned no response and {refused} were refused at connection.",
     ]
     if ev_seq:
-        parts.append("Docker events (time order): " + ", ".join(ev_seq) + ".")
+        parts.append("The container produced these docker events in order: "
+                     + ", ".join(ev_seq) + ".")
     else:
-        parts.append("Docker events: none (container stable).")
-    parts.append(f"Container logs: 'connection accepted' x{accepts}, 'auth failure' x{authfails}.")
+        parts.append("The container produced no docker events and stayed up throughout.")
+    parts.append(f"Its logs recorded 'connection accepted' {accepts} times "
+                 f"and 'auth failure' {authfails} times.")
     if etypes:
-        parts.append("Error signatures observed: " + ", ".join(sorted(etypes)) + ".")
-    parts.append(f"Peak cpu {sampler.peak_cpu:.1f}%, peak mem {sampler.peak_mem:.1f} MiB "
-                 f"over {sampler.samples} samples.")
+        parts.append("The observed failure signatures were: " + ", ".join(sorted(etypes)) + ".")
+    else:
+        parts.append("No crash, out-of-memory, or connection-refusal signatures were observed.")
+    parts.append(f"Resource use peaked at {sampler.peak_cpu:.1f} percent CPU "
+                 f"and {sampler.peak_mem:.1f} MiB memory.")
     signature_text = " ".join(parts)
 
     return {

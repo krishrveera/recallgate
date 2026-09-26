@@ -35,6 +35,6 @@ ANOMALY_THRESHOLD = 1.0
 NUM_CANDIDATES      = 100    # $vectorSearch numCandidates
 GATE_LIMIT          = 10     # $vectorSearch limit (top-k neighbors)
 RECENCY_WINDOW_SECS = 1800   # filter: only incidents within this window (server-side)
-MIN_EVIDENCE_SIM    = 0.90   # evidence must be a genuine near-neighbor (same footprint family)
-MIN_MEAN_SIM        = 0.90   # mean similarity of evidence must clear this to suppress
+MIN_EVIDENCE_SIM    = 0.97   # Atlas score space =(1+cos)/2; isolates same-family (~0.997) from cross-family (<=0.937)
+MIN_MEAN_SIM        = 0.97   # Atlas score space; mean evidence similarity to suppress
 # SUPPRESS_RATIO and MIN_MEAN_CONF defined above (0.6 / 0.6)

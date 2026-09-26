@@ -22,3 +22,12 @@ def anomaly_score(cheap_features):
 
 def is_anomaly(cheap_features):
     return anomaly_score(cheap_features) >= ANOMALY_THRESHOLD
+
+
+# Hard-failure signals: a footprint showing any of these is a real crash / scan /
+# error burst and must NEVER be suppressed by memory, regardless of stored verdicts.
+# (config_reload -- a clean restart -- has all of these at zero, so it stays suppressible.)
+def has_hard_signal(cheap_features):
+    cf = {k: cheap_features.get(k, 0) for k in _ALLOWED}
+    return (cf["oom_kills"] > 0 or cf["nonzero_exit_count"] > 0
+            or cf["conn_refused_count"] > 0 or cf["distinct_error_types"] > 0)

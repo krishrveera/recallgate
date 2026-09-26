@@ -76,8 +76,9 @@ def _printable(pipeline):
     p[0]["$vectorSearch"]["queryVector"] = f"<{len(qv)}-dim voyage embedding>"
     return p
 
-def decide(query_embedding, now_ts, print_pipeline=True):
+def decide(query_embedding, now_ts, cheap_features=None, print_pipeline=True):
     import json
+    from monitor.cheap import has_hard_signal
     pipeline = build_pipeline(query_embedding, now_ts)
     if print_pipeline:
         print("  --- Atlas aggregation pipeline (server-side decision) ---")
@@ -85,6 +86,19 @@ def decide(query_embedding, now_ts, print_pipeline=True):
         print("  --------------------------------------------------------")
 
     res = list(get_collection().aggregate(pipeline))
+
+    # Cheap-tier safety override (numeric features only): a footprint showing any
+    # hard-failure signal (crash / oom / refusal / error burst) is NEVER suppressed,
+    # no matter what memory says. Guarantees attack recall independent of LLM error.
+    hard = cheap_features is not None and has_hard_signal(cheap_features)
+    if hard:
+        stats = res[0] if res else {"n": 0, "benign": 0, "malicious": 0,
+                                    "mean_conf": None, "mean_score": None,
+                                    "benign_ratio": None, "suppress_score": None}
+        stats.pop("decision", None)
+        return {"decision": "escalate",
+                "reason": "cheap-tier hard-signal override: hard-failure footprint is never suppressed",
+                "neighbor_stats": stats}
 
     if not res:
         # cold start OR no neighbor cleared the similarity floor: never suppress on no evidence
@@ -107,3 +121,18 @@ def decide(query_embedding, now_ts, print_pipeline=True):
                   f"ratio {stats['benign_ratio']}, mean_conf {stats['mean_conf']}, "
                   f"mean_sim {stats['mean_score']})")
     return {"decision": decision, "reason": reason, "neighbor_stats": stats}
+
+
+def neighbors_debug(query_embedding, now_ts, limit=10):
+    """Diagnostics only (not the decision): list raw near-neighbors with their
+    stored verdict and similarity, for the recall-gate case dump. Never reads
+    ground_truth_label."""
+    since = int(now_ts) - RECENCY_WINDOW_SECS
+    pipe = [
+        {"$vectorSearch": {"index": VECTOR_INDEX, "path": "embedding",
+                           "queryVector": query_embedding, "numCandidates": NUM_CANDIDATES,
+                           "limit": limit, "filter": {"ts": {"$gte": since}}}},
+        {"$project": {"_id": 0, "episode_id": 1, "verdict": 1, "confidence": 1,
+                      "score": {"$meta": "vectorSearchScore"}}},
+    ]
+    return list(get_collection().aggregate(pipe))
