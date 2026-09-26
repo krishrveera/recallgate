@@ -122,8 +122,9 @@
 <div class="bar">
   <div class="brand">Recall Gate<span class="sub">one footprint · one pass through the pipeline</span></div>
   <div class="toggle" id="mode">
-    <button data-m="offline" class="sel">Offline replay</button>
-    <button data-m="live">Live (Atlas)</button>
+    <button data-m="offline" class="sel">Offline · all cache</button>
+    <button data-m="live">Live · real LLM</button>
+    <button data-m="fresh">Fresh · no cache</button>
   </div>
   <div class="ctl">
     <button class="act pri" id="play">▶ Play</button>
@@ -325,7 +326,7 @@ function reset(){ pause(); started=false; queue=[];allRecs=[];streamDone=false;c
 
 document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{
   const m=b.dataset.m;
-  if(EMB && m==="live"){ toast("Live mode runs in the local app: python viz/server.py → Live (Atlas)."); return; }
+  if(EMB && m!=="offline"){ toast("Live and Fresh run in the local app (python viz/server.py) against the real Atlas cluster + LLM."); return; }
   document.querySelectorAll("#mode button").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); mode=m; reset(); });
 $("#play").onclick=()=>{playing?pause():play();};
 $("#step").onclick=stepOne;

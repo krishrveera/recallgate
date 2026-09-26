@@ -32,7 +32,12 @@ class H(BaseHTTPRequestHandler):
             self.wfile.write(f"event: {ev}\ndata: {json.dumps(obj)}\n\n".encode())
             self.wfile.flush()
         try:
-            gen = live_records() if mode == "live" else offline_records()
+            if mode == "fresh":
+                gen = live_records(fresh=True)
+            elif mode == "live":
+                gen = live_records(fresh=False)
+            else:
+                gen = offline_records()
             send("start", {"mode": mode})
             last = None
             for rec in gen:
@@ -54,7 +59,7 @@ class H(BaseHTTPRequestHandler):
             self._page()
         elif u.path == "/events":
             mode = (parse_qs(u.query).get("mode", ["offline"])[0]).lower()
-            self._sse("live" if mode == "live" else "offline")
+            self._sse(mode if mode in ("live", "fresh", "offline") else "offline")
         else:
             self.send_response(404); self.end_headers()
 

@@ -37,16 +37,17 @@ def _client():
         _vc = voyageai.Client(api_key=VOYAGE_API_KEY)
     return _vc
 
-def embed(texts, input_type="document", max_retries=6, offline=False):
+def embed(texts, input_type="document", max_retries=6, offline=False, no_cache=False):
     """texts: str or list[str] -> list[list[float]]. Uses the disk cache first;
     only cache-missing texts hit Voyage (which also respects the free-tier 3 RPM).
-    offline=True forbids any network call: a cache miss raises."""
+    offline=True forbids any network call: a cache miss raises.
+    no_cache=True skips the cache READ (forces a live embedding) but still writes."""
     if isinstance(texts, str):
         texts = [texts]
     out = [None] * len(texts)
     misses = []
     for i, t in enumerate(texts):
-        c = _cache_get(t, input_type)
+        c = None if no_cache else _cache_get(t, input_type)
         if c is not None:
             out[i] = c
         else:

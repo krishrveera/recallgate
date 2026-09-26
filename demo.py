@@ -104,32 +104,38 @@ def chart(results, path="data/cost_curve.png"):
 HELDOUT = "data/heldout.jsonl"
 INTER_EP_SLEEP = 4.0   # let Atlas Search index freshly-written incidents
 
-def _live_episode(fp, vec, now_ts, print_pipeline=False):
-    """Run ONE footprint through the real live pipeline. Returns (decision, pred,
-    stats, reason, cost). Writes to live Atlas memory on escalate."""
+def _live_episode(fp, vec, now_ts, print_pipeline=False, no_cache_llm=True):
+    """Run ONE footprint through the real live pipeline. Returns
+    (decision, pred, stats, reason, cost, llm_info). Live mode calls the LLM live
+    on every escalation (no_cache_llm=True). Writes to live Atlas memory on escalate."""
+    import time as _time
     from monitor.gate import decide
     from monitor.llm import verdict as llm_verdict
     from memory.store import write_incident
     cf = fp["cheap_features"]
     if not is_anomaly(cf):
-        return "ignore", "benign", None, "below cheap threshold", 0
+        return "ignore", "benign", None, "below cheap threshold", 0, None
     g = decide(vec, now_ts, cheap_features=cf, print_pipeline=print_pipeline)
     if g["decision"] == "suppress":
-        return "suppress", "benign", g["neighbor_stats"], g["reason"], 0
+        return "suppress", "benign", g["neighbor_stats"], g["reason"], 0, None
+    _t = _time.time()
     v = llm_verdict(fp["signature_text"], context=f"cheap_score={anomaly_score(cf)}",
-                    allow_network=True)   # cache-or-live
+                    allow_network=True, no_cache=no_cache_llm)
+    ms = int((_time.time() - _t) * 1000)
     write_incident(fp["episode_id"], fp["signature_text"], vec, v["verdict"],
                    v["confidence"], fp["ground_truth_label"], cf, now_ts)
-    return "escalate", v["verdict"], g["neighbor_stats"], v["reasoning"], 1
+    return "escalate", v["verdict"], g["neighbor_stats"], v["reasoning"], 1, \
+           {"cached": bool(v.get("cached")), "ms": ms, "source": v.get("source")}
 
-def live_stream(stream=STREAM, shuffle_seed=None, wipe_first=True, tag="LIVE stream"):
+def live_stream(stream=STREAM, shuffle_seed=None, wipe_first=True, tag="LIVE stream",
+                fresh=False, no_cache_llm=False):
     import time
     from memory.store import wipe as mem_wipe
     fps = [json.loads(l) for l in open(stream)]
     if shuffle_seed is not None:
         random.Random(shuffle_seed).shuffle(fps)
         tag += f" (shuffled seed={shuffle_seed})"
-    vecs = embed([f["signature_text"] for f in fps], input_type="document")  # cache-or-live
+    vecs = embed([f["signature_text"] for f in fps], input_type="document", no_cache=fresh)
     emb = {f["episode_id"]: v for f, v in zip(fps, vecs)}
     if wipe_first:
         mem_wipe()
@@ -137,7 +143,8 @@ def live_stream(stream=STREAM, shuffle_seed=None, wipe_first=True, tag="LIVE str
     expensive = 0; results = []
     for i, fp in enumerate(fps):
         eid = fp["episode_id"]
-        decision, pred, stats, reason, cost = _live_episode(fp, emb[eid], int(time.time()))
+        decision, pred, stats, reason, cost, _li = _live_episode(
+            fp, emb[eid], int(time.time()), no_cache_llm=no_cache_llm)
         expensive += cost
         results.append({"episode_id": eid, "truth": fp["ground_truth_label"],
                         "decision": decision, "predicted": pred, "cost": cost, "cum": expensive})
@@ -161,17 +168,19 @@ def live_heldout(train=STREAM, held=HELDOUT):
     print("\n[.] waiting for final writes to index ..."); time.sleep(8)
 
     held_fps = [json.loads(l) for l in open(held)]
-    print(f"\n=== HELD-OUT (never seen, NOT pre-cached) -- {len(held_fps)} footprints, live ===")
-    vecs = embed([f["signature_text"] for f in held_fps], input_type="document")  # live embed
+    print(f"\n=== HELD-OUT (never seen, NOT pre-cached) -- {len(held_fps)} footprints, LIVE LLM ===")
+    vecs = embed([f["signature_text"] for f in held_fps], input_type="document")  # live embed on miss
     results = []
     for i, fp in enumerate(held_fps):
         eid = fp["episode_id"]
-        decision, pred, stats, reason, cost = _live_episode(
-            fp, vecs[i], int(time.time()), print_pipeline=(i == 0))
+        decision, pred, stats, reason, cost, li = _live_episode(
+            fp, vecs[i], int(time.time()), print_pipeline=(i == 0), no_cache_llm=True)
         results.append({"episode_id": eid, "truth": fp["ground_truth_label"],
                         "decision": decision, "predicted": pred})
         badge = {"ignore": "ignore", "suppress": "SUPPRESSED", "escalate": "ESCALATED"}[decision]
+        call = f"LIVE LLM call {li['ms']}ms (cached={li['cached']})" if li else "no LLM (not escalated)"
         print(f"\n  {eid}  truth={fp['ground_truth_label']}  -> {badge}  pred={pred}")
+        print(f"    LLM           : {call}")
         print(f"    reason        : {reason}")
         print(f"    neighbor_stats: {json.dumps(stats)}")
         time.sleep(INTER_EP_SLEEP)
@@ -190,9 +199,11 @@ def live_footprint(path, warm=True):
         time.sleep(8)
     fp = json.load(open(path)) if path.endswith(".json") else json.loads(open(path).readline())
     vec = embed([fp["signature_text"]], input_type="document")[0]  # live embed
-    decision, pred, stats, reason, cost = _live_episode(fp, vec, int(time.time()), print_pipeline=True)
+    decision, pred, stats, reason, cost, li = _live_episode(fp, vec, int(time.time()),
+                                                            print_pipeline=True, no_cache_llm=True)
     print(f"\nSUPPLIED FOOTPRINT: {fp.get('episode_id','(adhoc)')}")
     print(f"  decision      : {decision.upper()}  pred={pred}")
+    if li: print(f"  LLM           : LIVE call {li['ms']}ms (cached={li['cached']})")
     print(f"  reason        : {reason}")
     print(f"  neighbor_stats: {json.dumps(stats)}")
 
@@ -200,17 +211,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--online", action="store_true", help="offline logic but allow network to warm caches")
     ap.add_argument("--offline", action="store_true", help="fully offline deterministic replay (default)")
-    ap.add_argument("--live", action="store_true", help="live pipeline: real Atlas + memory, cache-or-live embed/LLM")
+    ap.add_argument("--live", action="store_true", help="live: real Atlas + real LLM call on every escalation")
+    ap.add_argument("--fresh", action="store_true", help="fresh: like --live but bypass the embedding cache too")
     ap.add_argument("--shuffle", type=int, default=None, help="run the stream in a shuffled order (live)")
-    ap.add_argument("--footprint", default=None, help="feed one supplied footprint to the live gate")
+    ap.add_argument("--footprint", default=None, help="feed one supplied footprint to the live gate (real LLM call)")
     ap.add_argument("--stream", default=STREAM)
     args = ap.parse_args()
 
     if args.footprint:
+        print("[.] MODE: live footprint -- real Atlas + real LLM call")
         live_footprint(args.footprint); return
-    if args.live and args.shuffle is not None:
-        live_stream(args.stream, shuffle_seed=args.shuffle); return
-    if args.live:
+    if (args.live or args.fresh) and args.shuffle is not None:
+        print(f"[.] MODE: {'fresh' if args.fresh else 'live'} shuffled -- real LLM every escalation")
+        live_stream(args.stream, shuffle_seed=args.shuffle, fresh=args.fresh, no_cache_llm=True); return
+    if args.live or args.fresh:
+        print(f"[.] MODE: {'FRESH (no cache at all)' if args.fresh else 'LIVE (real LLM on new inputs)'}")
         live_heldout(args.stream); return
 
     # ---- offline default (unchanged) ----

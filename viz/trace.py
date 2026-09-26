@@ -72,12 +72,14 @@ def _record(i, fp, cheap, override, neighbors, stats, decision, reason, llm, cos
         "logs": logs,
     }
 
-# ---------------- LIVE ----------------
-def live_records(stream=STREAM, inter_sleep=4.0):
+# ---------------- LIVE / FRESH ----------------
+# live : real Atlas + a real LLM call on every escalation (embedding cache for speed)
+# fresh: same, but also bypasses the embedding cache (nothing read from any cache)
+def live_records(stream=STREAM, inter_sleep=4.0, fresh=False):
     from monitor.gate import decide, neighbors_debug
     from memory.store import write_incident, wipe
     fps = [json.loads(l) for l in open(stream)]
-    vecs = embed([f["signature_text"] for f in fps], input_type="document")  # cache-or-live
+    vecs = embed([f["signature_text"] for f in fps], input_type="document", no_cache=fresh)
     emb = {f["episode_id"]: v for f, v in zip(fps, vecs)}
     wipe()
     expensive = saved = atk = atk_esc = 0
@@ -92,7 +94,8 @@ def live_records(stream=STREAM, inter_sleep=4.0):
             decision, stats, reason = g["decision"], g["neighbor_stats"], g["reason"]
             if decision == "escalate":
                 _t = time.time()
-                v = llm_verdict(fp["signature_text"], context=f"cheap_score={cheap['score']}", allow_network=True)
+                v = llm_verdict(fp["signature_text"], context=f"cheap_score={cheap['score']}",
+                                allow_network=True, no_cache=True)   # live mode = real call every escalation
                 _ms = int((time.time() - _t) * 1000)
                 cost = 1; expensive += 1
                 llm = {"verdict": v["verdict"], "confidence": v["confidence"], "reasoning": v["reasoning"],

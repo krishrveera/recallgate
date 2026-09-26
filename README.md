@@ -33,19 +33,31 @@ cp .env.example .env         # fill MONGODB_URI, VOYAGE_API_KEY, LLM_API_KEY
 python reindex.py            # create incident_vec (dim 1024, cosine, filter ts)
 ```
 
-## Run
+## Run — three modes, know which one you're in
+| mode | embeddings | LLM | Atlas | network |
+|------|-----------|-----|-------|---------|
+| **offline** | cache only | cache only | local mirror | none (keys can be blank) |
+| **live** | cache, live on miss | **real call every escalation** | real cluster | yes |
+| **fresh** | **live (cache bypassed)** | **real call every escalation** | real cluster | yes |
+
+offline is the venue-safe fallback; live proves the LLM is really queried; fresh forces everything live.
+
 ```bash
-# offline deterministic replay (venue-safe: runs with the network + keys disabled)
+# offline deterministic replay (runs with the network + keys disabled)
 python demo.py                       # recall 1.00, cost series, writes data/cost_curve.png
 
-# live pipeline: real Atlas $vectorSearch + memory, cache-or-live embeddings/LLM
-python demo.py --live                # warms memory, then runs the held-out set live
+# live: real Atlas + a real LLM call on every escalation
+python demo.py --live                # warms memory, then runs held-out with live LLM calls
+python demo.py --fresh               # like --live, also bypasses the embedding cache
 python demo.py --live --shuffle 42   # same stream, different order (cost savings are order-free)
-python demo.py --live --footprint FILE.json   # judge-supplied footprint, decided live
+python demo.py --live --footprint FILE.json   # judge-supplied footprint, real live call
 
-# glass-box single-page UI (watch each footprint move through the pipeline)
-python viz/server.py                 # open http://127.0.0.1:8077  -> Run LIVE or Run OFFLINE
+# glass-box single-page UI
+python viz/server.py                 # http://127.0.0.1:8077 -> Offline · all cache / Live · real LLM / Fresh · no cache
 ```
+
+Held-out set (`data/heldout.jsonl`, unseen seeds, not pre-cached) produces genuine live LLM
+calls in live/fresh mode; attacks among them are still escalated (recall holds on unseen inputs).
 
 ## Rebuild from scratch (optional)
 ```bash

@@ -65,12 +65,15 @@ def _fallback(signature_text):
             "reasoning": "deterministic fallback saw no crash/error/scan signatures",
             "source": "fallback"}
 
-def verdict(signature_text, context="", allow_network=True):
+def verdict(signature_text, context="", allow_network=True, no_cache=False):
+    """no_cache=True skips the cache READ (forces a real call when allow_network),
+    but still writes the result to cache."""
     k = _key(signature_text, context)
-    cached = _cache_get(k)
-    if cached is not None:
-        cached["cached"] = True
-        return cached
+    if not no_cache:
+        cached = _cache_get(k)
+        if cached is not None:
+            cached["cached"] = True
+            return cached
 
     result = None
     if allow_network and LLM_API_KEY:
