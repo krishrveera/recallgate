@@ -1,0 +1,9 @@
+services:
+  target:
+    build: .
+    container_name: harness-target
+    ports:
+      - "9000-9010:9000-9010"
+    restart: always
+    mem_limit: 100m
+    memswap_limit: 100m
