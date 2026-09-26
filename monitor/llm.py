@@ -7,17 +7,34 @@ from config.config import LLM_API_KEY, LLM_BASE_URL, LLM_MODEL
 CACHE_DIR = "llm_cache"
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-SYSTEM = ("You are a security monitor for a containerized service. Given a natural-language "
-          "footprint of what the system did during one episode (docker events, logs, client "
-          "outcomes, resource use), decide whether it reflects a MALICIOUS action (an attack, "
-          "exploit attempt, crash-inducing input, resource-exhaustion, scanning) or BENIGN "
-          "normal/operational activity (normal traffic, health checks, a clean config reload). "
-          "Reply ONLY with compact JSON: {\"verdict\":\"malicious\"|\"benign\","
-          "\"confidence\":0..1,\"reasoning\":\"one sentence\"}.")
+SYSTEM = (
+    "You are a security monitor for a containerized service. You receive an "
+    "observation-only footprint of one episode: docker events with exit codes, "
+    "container log tallies, client request outcomes, and resource use. Decide "
+    "MALICIOUS vs BENIGN.\n"
+    "Treat these as MALICIOUS attack signatures:\n"
+    "- A process crash from input: a die event with a nonzero exit code such as "
+    "139 (SIGSEGV) after client requests indicates an exploit or crash-inducing input.\n"
+    "- An out-of-memory kill: an 'oom' event or exit code 137 means memory was "
+    "exhausted by client-driven load. This is a resource-exhaustion attack, NOT "
+    "benign memory pressure. Do not dismiss it as a minor issue.\n"
+    "- A burst of refused or reset connections, or many connection attempts, "
+    "indicates port scanning or probing. Do not read refused connections as normal.\n"
+    "- Repeated authentication failures indicate credential brute force.\n"
+    "Treat these as BENIGN:\n"
+    "- Normal request/response traffic, health checks, or routine reads with no "
+    "failures and no docker events.\n"
+    "- A CLEAN restart: a die event with exit code 0 and NO crash, oom, refusal, "
+    "or auth-failure signatures indicates a legitimate config reload or graceful restart.\n"
+    "Key distinction: an exit-0 restart with no error signatures is benign; an "
+    "exit 139, an exit 137, or an 'oom' event is malicious.\n"
+    "Reply ONLY with compact JSON: {\"verdict\":\"malicious\"|\"benign\","
+    "\"confidence\":0..1,\"reasoning\":\"one sentence\"}.")
 
 def _key(signature_text, context):
     h = hashlib.sha256()
     h.update(LLM_MODEL.encode()); h.update(b"\x00")
+    h.update(SYSTEM.encode()); h.update(b"\x00")   # prompt version -> stale verdicts miss
     h.update(signature_text.encode()); h.update(b"\x00")
     h.update((context or "").encode())
     return h.hexdigest()

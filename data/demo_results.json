@@ -43,7 +43,7 @@
     "episode_id": "ep02-resource_exhaustion",
     "truth": "attack",
     "decision": "escalate",
-    "predicted": "benign",
+    "predicted": "malicious",
     "cost": 1,
     "cum": 3,
     "reason": "cheap-tier hard-signal override: hard-failure footprint is never suppressed",
@@ -74,7 +74,7 @@
     "episode_id": "ep04-port_scan",
     "truth": "attack",
     "decision": "escalate",
-    "predicted": "benign",
+    "predicted": "malicious",
     "cost": 1,
     "cum": 4,
     "reason": "cheap-tier hard-signal override: hard-failure footprint is never suppressed",
@@ -139,16 +139,16 @@
     "predicted": "benign",
     "cost": 0,
     "cum": 5,
-    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 0.9, mean_sim 0.999",
+    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 1.0, mean_sim 0.999",
     "neighbor_stats": {
       "n": 1,
       "benign": 1,
       "malicious": 0,
-      "mean_conf": 0.9,
+      "mean_conf": 1.0,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 1.0,
-      "suppress_score": 0.899
+      "suppress_score": 0.999
     }
   },
   {
@@ -164,7 +164,7 @@
       "n": 1,
       "benign": 0,
       "malicious": 1,
-      "mean_conf": 0.8,
+      "mean_conf": 0.9,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 0.0,
@@ -179,16 +179,16 @@
     "predicted": "benign",
     "cost": 0,
     "cum": 6,
-    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 0.9, mean_sim 0.999",
+    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 1.0, mean_sim 0.999",
     "neighbor_stats": {
       "n": 1,
       "benign": 1,
       "malicious": 0,
-      "mean_conf": 0.9,
+      "mean_conf": 1.0,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 1.0,
-      "suppress_score": 0.899
+      "suppress_score": 0.999
     }
   },
   {
@@ -207,19 +207,19 @@
     "episode_id": "ep12-resource_exhaustion",
     "truth": "attack",
     "decision": "escalate",
-    "predicted": "benign",
+    "predicted": "malicious",
     "cost": 1,
     "cum": 7,
     "reason": "cheap-tier hard-signal override: hard-failure footprint is never suppressed",
     "neighbor_stats": {
       "n": 1,
-      "benign": 1,
-      "malicious": 0,
-      "mean_conf": 0.8,
+      "benign": 0,
+      "malicious": 1,
+      "mean_conf": 0.9,
       "mean_score": 0.999,
       "top_score": 0.999,
-      "benign_ratio": 1.0,
-      "suppress_score": 0.799
+      "benign_ratio": 0.0,
+      "suppress_score": 0.0
     }
   },
   {
@@ -230,16 +230,16 @@
     "predicted": "benign",
     "cost": 0,
     "cum": 7,
-    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 0.9, mean_sim 0.999",
+    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 1.0, mean_sim 0.999",
     "neighbor_stats": {
       "n": 1,
       "benign": 1,
       "malicious": 0,
-      "mean_conf": 0.9,
+      "mean_conf": 1.0,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 1.0,
-      "suppress_score": 0.899
+      "suppress_score": 0.999
     }
   },
   {
@@ -258,19 +258,19 @@
     "episode_id": "ep15-port_scan",
     "truth": "attack",
     "decision": "escalate",
-    "predicted": "benign",
+    "predicted": "malicious",
     "cost": 1,
     "cum": 8,
     "reason": "cheap-tier hard-signal override: hard-failure footprint is never suppressed",
     "neighbor_stats": {
       "n": 1,
-      "benign": 1,
-      "malicious": 0,
+      "benign": 0,
+      "malicious": 1,
       "mean_conf": 0.9,
       "mean_score": 0.999,
       "top_score": 0.999,
-      "benign_ratio": 1.0,
-      "suppress_score": 0.899
+      "benign_ratio": 0.0,
+      "suppress_score": 0.0
     }
   },
   {
@@ -281,16 +281,16 @@
     "predicted": "benign",
     "cost": 0,
     "cum": 8,
-    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 0.9, mean_sim 0.999",
+    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 1.0, mean_sim 0.999",
     "neighbor_stats": {
       "n": 1,
       "benign": 1,
       "malicious": 0,
-      "mean_conf": 0.9,
+      "mean_conf": 1.0,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 1.0,
-      "suppress_score": 0.899
+      "suppress_score": 0.999
     }
   },
   {
@@ -317,7 +317,7 @@
       "n": 2,
       "benign": 0,
       "malicious": 2,
-      "mean_conf": 0.8,
+      "mean_conf": 0.9,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 0.0,
@@ -332,16 +332,16 @@
     "predicted": "benign",
     "cost": 0,
     "cum": 9,
-    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 0.9, mean_sim 0.999",
+    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 1.0, mean_sim 0.999",
     "neighbor_stats": {
       "n": 1,
       "benign": 1,
       "malicious": 0,
-      "mean_conf": 0.9,
+      "mean_conf": 1.0,
       "mean_score": 0.999,
       "top_score": 0.999,
       "benign_ratio": 1.0,
-      "suppress_score": 0.899
+      "suppress_score": 0.999
     }
   },
   {
@@ -394,16 +394,16 @@
     "predicted": "benign",
     "cost": 0,
     "cum": 10,
-    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 0.9, mean_sim 0.997",
+    "reason": "1/1 neighbors benign (ratio 1.0), mean_conf 1.0, mean_sim 0.997",
     "neighbor_stats": {
       "n": 1,
       "benign": 1,
       "malicious": 0,
-      "mean_conf": 0.9,
+      "mean_conf": 1.0,
       "mean_score": 0.997,
       "top_score": 0.997,
       "benign_ratio": 1.0,
-      "suppress_score": 0.897
+      "suppress_score": 0.997
     }
   }
 ]
