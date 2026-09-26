@@ -1,0 +1,1 @@
+{"verdict": "benign", "confidence": 0.9, "reasoning": "The service responded normally to health checks with no errors or suspicious events.", "source": "llm"}

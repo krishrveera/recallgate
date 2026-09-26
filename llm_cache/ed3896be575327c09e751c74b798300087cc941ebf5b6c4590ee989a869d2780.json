@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.8, "reasoning": "The presence of a high number of distinct syscalls and frequent use of fcntl64 and socketcall suggests potential exploitation or abnormal behavior rather than normal operational activity.", "source": "llm"}

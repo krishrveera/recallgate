@@ -1,0 +1,1 @@
+{"verdict": "benign", "confidence": 0.9, "reasoning": "The footprint indicates a clean config reload with no errors or failures, and resource usage is minimal.", "source": "llm"}

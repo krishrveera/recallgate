@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.9, "reasoning": "The container experienced a crash with exit code 139 (SIGSEGV), indicating a potential exploit or crash-inducing input.", "source": "llm"}

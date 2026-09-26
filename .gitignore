@@ -9,14 +9,17 @@ __pycache__/
 .venv/
 venv/
 
-# data / caches
-data/*.jsonl
-cache/
-llm_cache/
+# logs / os
 *.log
-
-# os
 .DS_Store
 
-# ADFA-LD raw dataset (large, fetched on demand)
+# large or regenerable — not needed to run the offline demo
 data/adfa_raw/
+data/adfa_stream.jsonl
+data/*_results.json
+data/demo_results.json
+data/cost_curve.png
+cache/
+
+# kept in the repo so `python demo.py` (offline) runs on a fresh clone:
+#   data/footprints.jsonl, data/heldout.jsonl, embed_cache/, llm_cache/

@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.85, "reasoning": "The episode indicates a resource exhaustion attack with an out-of-memory (OOM) condition triggered by an allocation flood, suggesting an exploit attempt.", "source": "llm"}

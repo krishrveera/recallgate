@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.8, "reasoning": "The presence of multiple execve calls and unusual syscall patterns suggest potential exploitation or an attack.", "source": "llm"}

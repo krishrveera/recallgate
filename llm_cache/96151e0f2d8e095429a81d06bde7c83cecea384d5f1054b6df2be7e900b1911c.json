@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.9, "reasoning": "The repeated 'auth failure' messages indicate a potential brute-force attack or unauthorized access attempt.", "source": "llm"}

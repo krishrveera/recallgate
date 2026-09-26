@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.8, "reasoning": "The presence of multiple mprotect and mmap2 syscalls, along with a high frequency of sys78, suggests potential memory manipulation or exploitation attempts.", "source": "llm"}

@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.8, "reasoning": "The segfault indicates a potential exploit attempt or crash-inducing input, suggesting malicious activity.", "source": "llm"}

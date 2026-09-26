@@ -1,0 +1,1 @@
+{"verdict": "benign", "confidence": 0.8, "reasoning": "The events indicate a normal operational cycle with an out-of-memory (oom) event likely due to resource limits, rather than malicious activity.", "source": "llm"}

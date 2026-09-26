@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.85, "reasoning": "The presence of multiple socket calls and unusual syscall patterns, particularly the high frequency of socket operations and the use of clone, suggests potential exploitation or a network attack.", "source": "llm"}

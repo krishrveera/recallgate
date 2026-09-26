@@ -1,0 +1,1 @@
+{"verdict": "benign", "confidence": 1.0, "reasoning": "The container had a clean restart with exit code 0, no error signatures, and normal request traffic.", "source": "llm"}

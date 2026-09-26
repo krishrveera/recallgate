@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.9, "reasoning": "The repeated authentication failures indicate a credential brute force attack.", "source": "llm"}

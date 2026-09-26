@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.9, "reasoning": "The burst of 30 refused connections indicates a potential port scanning or probing attack.", "source": "llm"}

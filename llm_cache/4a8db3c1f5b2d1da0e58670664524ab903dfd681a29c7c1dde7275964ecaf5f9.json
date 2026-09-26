@@ -1,0 +1,1 @@
+{"verdict": "malicious", "confidence": 0.9, "reasoning": "The repeated connection attempts to a range of ports with a high failure rate indicate a port scanning activity, which is typically associated with malicious intent.", "source": "llm"}
