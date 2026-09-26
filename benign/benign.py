@@ -44,6 +44,27 @@ def run(family, seed):
             do(b"PING\n"); time.sleep(rnd.uniform(0.02, 0.06))
         note = "periodic health pings"
 
+    elif family == "config_reload":
+        # legitimate operator action: some traffic, then a clean reload (restart).
+        # Restart-shaped footprint but exit 0 -> benign; memory must learn this.
+        reasons = ["rotate-tls","update-flags","apply-limits","refresh-acl","new-build"]
+        for _ in range(rnd.randint(2, 4)):
+            do(b"PING\n"); time.sleep(rnd.uniform(0.02, 0.05))
+        do(b"ECHO reload:" + rnd.choice(reasons).encode() + b"\n")
+        # trigger clean restart
+        try:
+            s = socket.create_connection((HOST, PORT), timeout=2); req += 1
+            s.sendall(b"RELOAD\n")
+            try: s.settimeout(1); s.recv(64)
+            except Exception: pass
+            s.close()
+        except OSError:
+            fail += 1
+        time.sleep(3.5)                 # wait out the restart window (avoid noise)
+        for _ in range(rnd.randint(2, 4)):
+            do(b"PING\n"); time.sleep(rnd.uniform(0.02, 0.05))
+        note = "config reload with clean restart"
+
     elif family == "file_ops":
         dirs = ["/var/data","/srv/files","/tmp/cache","/opt/app/logs"]
         for _ in range(rnd.randint(8, 16)):

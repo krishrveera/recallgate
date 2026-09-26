@@ -55,6 +55,12 @@ static void handle(int fd) {
             dprintf(fd, "ALLOC %ld\n", sz);
         } else if (strncmp(buf, "GET ", 4) == 0) {
             dprintf(fd, "OK 200\n");
+        } else if (strncmp(buf, "RELOAD", 6) == 0) {
+            /* benign clean shutdown for config reload; restart policy brings it back */
+            dprintf(fd, "RELOADING\n");
+            fprintf(stderr, "config reload requested; clean exit for restart\n");
+            close(fd);
+            exit(0);                       /* exit 0 -> clean restart, not a crash */
         } else {
             dprintf(fd, "ERR unknown\n");
         }

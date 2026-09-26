@@ -2,18 +2,23 @@
 import json, sys, time
 from collector.collector import capture_episode
 
-# (kind, family, seed) — mix of attack and benign families
+# (kind, family, seed) — the session stream. Ordered so families recur:
+# config_reload is a benign-but-anomalous family (clean restart) that the cheap
+# tier flags, so memory has something to learn and later suppress. Attacks recur
+# too (segfault twice) to show second-pass recognition from memory.
 PLAN = [
-    ("benign", "normal_requests", 11),
-    ("attack", "port_scan",        21),
-    ("benign", "health_checks",    12),
-    ("attack", "auth_bruteforce",  22),
-    ("benign", "file_ops",         13),
-    ("attack", "malformed_segfault", 23),
-    ("benign", "normal_requests",  14),
-    ("attack", "resource_exhaustion", 24),
-    ("benign", "health_checks",    15),
-    ("attack", "malformed_segfault", 25),
+    ("benign", "normal_requests",     11),  # zero-signal -> cheap ignores (free)
+    ("attack", "malformed_segfault",  23),  # cold -> escalate -> malicious stored
+    ("benign", "config_reload",       31),  # anomalous benign, cold -> escalate -> benign stored
+    ("attack", "port_scan",           21),  # escalate -> malicious
+    ("benign", "health_checks",       12),  # zero-signal -> ignore
+    ("attack", "resource_exhaustion", 24),  # escalate -> malicious
+    ("benign", "config_reload",       32),  # surface-varied -> gate SUPPRESSES from memory
+    ("attack", "auth_bruteforce",     22),  # escalate -> malicious
+    ("benign", "file_ops",            13),  # zero-signal -> ignore
+    ("attack", "malformed_segfault",  25),  # repeat attack -> recognized from memory (escalate)
+    ("benign", "config_reload",       33),  # surface-varied -> SUPPRESS again
+    ("benign", "normal_requests",     14),  # zero-signal -> ignore
 ]
 
 OUT = "data/footprints.jsonl"
